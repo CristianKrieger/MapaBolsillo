@@ -1,5 +1,7 @@
 package com.essentialab.apps.mapadebolsillo.activity;
 
+import java.util.ArrayList;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -13,11 +15,18 @@ import android.content.IntentSender;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
+import android.view.View;
+import android.widget.ListView;
 import android.widget.Toast;
 
+import com.essentailab.training.androidadvanceddemos.HomeActivity.DrawerItemClickListener;
+import com.essentailab.training.androidadvanceddemos.adapter.SimpleListAdapter;
+import com.essentailab.training.androidadvanceddemos.entities.DrawerItem;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.common.GooglePlayServicesUtil;
@@ -36,6 +45,11 @@ public class MainActivity extends ActionBarActivity implements
 	GooglePlayServicesClient.ConnectionCallbacks, 
 	GooglePlayServicesClient.OnConnectionFailedListener,
 	LocationListener{
+	
+	private DrawerLayout mDrawerLayout;
+	private ListView mDrawerList;
+	private String mTitle;
+	private ActionBarDrawerToggle mDrawerToggle;
 	
 	private SupportMapFragment mapFragment;
 	private GoogleMap map;
@@ -92,7 +106,12 @@ public class MainActivity extends ActionBarActivity implements
 	    super.onCreate(savedInstanceState);
 	    setContentView(R.layout.map_fragment);
 	    
-	    mapFragment = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map));
+	    initializeMap();
+	    startNavigationDrawer();
+	}
+	
+	private void initializeMap(){
+		mapFragment = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map));
 	    map = mapFragment.getMap();
 	    
 	    map.setMyLocationEnabled(true);
@@ -110,7 +129,48 @@ public class MainActivity extends ActionBarActivity implements
 	    
 	    myTask = new TestApiSetravi();
 	    myTask.execute();
-	} 
+	}
+	
+	private void startNavigationDrawer(){
+		mDrawerToggle = new ActionBarDrawerToggle(
+        		this,
+                mDrawerLayout,         
+                R.drawable.ic_drawer,
+                R.string.act_home_drawer_open,
+                R.string.act_home_drawer_close){
+
+            public void onDrawerClosed(View view) {
+                getSupportActionBar().setTitle(mTitle);
+            }
+
+            public void onDrawerOpened(View drawerView) {
+                getSupportActionBar().setTitle(mTitle);
+            }
+        };
+        
+        mDrawerLayout.setDrawerListener(mDrawerToggle);
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
+        
+        int[] mDrawables = {
+        	R.drawable.ic_drawer_about,
+        	R.drawable.ic_drawer_list,
+        	R.drawable.ic_drawer_grid,
+        	R.drawable.ic_drawer_web,
+        	R.drawable.ic_drawer_nested,
+        	R.drawable.ic_drawer_gallery,
+        	R.drawable.ic_drawer_error
+        };
+        
+        ArrayList<DrawerItem> data = new ArrayList<DrawerItem>();
+        for(int i=0; i<mDrawerTitles.length; i++)
+        	data.add(new DrawerItem(getResources().getDrawable(mDrawables[i]), mDrawerTitles[i]));
+        
+		mDrawerList.setAdapter(new SimpleListAdapter(data,
+        		getLayoutInflater(), R.layout.row_drawer, R.id.row_drawer_img, R.id.row_drawer_txt));
+        mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
+	}
 	
 	/*
 	 * Called when the Activity becomes visible.
