@@ -436,7 +436,8 @@ public class HomeActivity extends ActionBarActivity implements
 	    Location location = mLocationClient.getLastLocation();
 	    LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
 	    CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 17);
-	    map.animateCamera(cameraUpdate);
+	    //map.animateCamera(cameraUpdate);
+	    map.moveCamera(cameraUpdate);
 	}
 
 	@Override
@@ -450,10 +451,10 @@ public class HomeActivity extends ActionBarActivity implements
 	public void onLocationChanged(Location location) {
 		// Report to the UI that the location was updated
 		
-        String msg = "Updated Location: " +
+        /*String msg = "Updated Location: " +
                 Double.toString(location.getLatitude()) + "," +
                 Double.toString(location.getLongitude());
-        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();*/
         map.clear();
 		map.addMarker(new MarkerOptions().position(new LatLng(location.getLatitude(),
 				location.getLongitude())).title("Marker"));
