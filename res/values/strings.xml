@@ -8,10 +8,12 @@
     <string name="act_home_drawer_close">Close Drawer</string>
 	
     <string-array name="act_home_drawer_array">
-        <item>Todas las capas</item>
-        <item>Metro, Tren Ligero y Suburbano</item>
-        <item>MetroBus</item>
+        <item>Metro</item>
+        <item>Metrobús</item>
         <item>RTP</item>
-        <item>Ecobici</item>
+        <item>Transportes Eléctricos</item>
+        <item>Ferrocarril Suburbano</item>
     </string-array>
+    
+     <string name="act_home_toast_agencydown">No hay datos disponibles para este servicio por ahora.</string>
 </resources>

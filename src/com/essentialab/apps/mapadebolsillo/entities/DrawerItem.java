@@ -1,13 +1,12 @@
 package com.essentialab.apps.mapadebolsillo.entities;
 
-import android.graphics.drawable.Drawable;
 
 public class DrawerItem {
-	public Drawable icon;
+	public int iconId;
 	public String title;
 	
-	public DrawerItem(Drawable icon, String title) {
-		this.icon = icon;
+	public DrawerItem(int iconId, String title) {
+		this.iconId = iconId;
 		this.title = title;
 	}
 }

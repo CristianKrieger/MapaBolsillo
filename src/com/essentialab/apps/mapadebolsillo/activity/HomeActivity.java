@@ -2,12 +2,6 @@ package com.essentialab.apps.mapadebolsillo.activity;
 
 import java.util.ArrayList;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.util.EntityUtils;
-
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
@@ -25,11 +19,17 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.essentialab.apps.mapadebolsillo.R;
-import com.essentialab.apps.mapadebolsillo.adapter.SimpleListAdapter;
+import com.essentialab.apps.mapadebolsillo.adapter.UniversalListAdapter;
 import com.essentialab.apps.mapadebolsillo.entities.DrawerItem;
+import com.essentialab.apps.mapadebolsillo.entities.HeadedList;
+import com.essentialab.apps.mapadebolsillo.interfaces.ListHeaderInflationAction;
+import com.essentialab.apps.mapadebolsillo.interfaces.ListItemInflationAction;
+import com.essentialab.apps.mapadebolsillo.parser.ParsingUtils;
+import com.essentialab.apps.mapadebolsillo.parser.entities.Agencies;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.common.GooglePlayServicesUtil;
@@ -48,16 +48,36 @@ public class HomeActivity extends ActionBarActivity implements
 	GooglePlayServicesClient.OnConnectionFailedListener,
 	LocationListener{
 	
+	private boolean isMetroAvailable = false;
+	private boolean isMetroBusAvailable = false;
+	private boolean isRTPAvailable = false;
+	private boolean isSTEAvailable = false;
+	private boolean isSUBAvailable = false;
+	
+	private boolean isMetroSelected = false;
+	private boolean isMetroBusSelected = false;
+	private boolean isRTPSelected = false;
+	private boolean isSTESelected = false;
+	private boolean isSUBSelected = false;
+	
+	private static final int DRAWER_ITEM_METRO = 1;
+	private static final int DRAWER_ITEM_METROBUS = 2;
+	private static final int DRAWER_ITEM_RTP = 3;
+	private static final int DRAWER_ITEM_STE = 4;
+	private static final int DRAWER_ITEM_SUB = 5;
+	
 	private DrawerLayout mDrawerLayout;
 	private ListView mDrawerList;
 	private String mTitle;
 	private ActionBarDrawerToggle mDrawerToggle;
 	private String[] mDrawerTitles;
 	
+	private ProgressBar pb;
+	
 	private SupportMapFragment mapFragment;
 	private GoogleMap map;
 	private LocationClient mLocationClient;
-	private TestApiSetravi myTask;
+	private AgencyGetterAsyncTask myTask;
 	
 	// Milliseconds per second
     private static final int MILLISECONDS_PER_SECOND = 1000;
@@ -108,6 +128,7 @@ public class HomeActivity extends ActionBarActivity implements
 	protected void onCreate(Bundle savedInstanceState) {
 	    super.onCreate(savedInstanceState);
 	    setContentView(R.layout.activity_home);
+	    pb=(ProgressBar) findViewById(R.id.act_home_pb);
 	    
 	    initializeMap();
 	    startNavigationDrawer();
@@ -130,7 +151,7 @@ public class HomeActivity extends ActionBarActivity implements
 	    
 	    mLocationClient = new LocationClient(this, this, this);
 	    
-	    myTask = new TestApiSetravi();
+	    myTask = new AgencyGetterAsyncTask();
 	    myTask.execute();
 	}
 	
@@ -169,13 +190,24 @@ public class HomeActivity extends ActionBarActivity implements
         	R.drawable.ic_launcher
         };
         
-        ArrayList<DrawerItem> data = new ArrayList<DrawerItem>();
-        for(int i=0; i<mDrawerTitles.length; i++)
-        	data.add(new DrawerItem(getResources().getDrawable(mDrawables[i]), mDrawerTitles[i]));
-        
-		mDrawerList.setAdapter(new SimpleListAdapter(data,
-        		getLayoutInflater(), R.layout.row_drawer, R.id.row_drawer_img, R.id.row_drawer_txt));
+        ArrayList<Object> data = new ArrayList<Object>();
+        for(int i=0; i<1; i++){
+        	HeadedList<String, DrawerItem> x = new HeadedList<String, DrawerItem>();
+        	x.setHeader("Servicios de Transporte");
+        	ArrayList<DrawerItem> y = new ArrayList<DrawerItem>();
+        	for(int j=0; j<mDrawerTitles.length; j++)
+        		y.add(new DrawerItem(mDrawables[j], mDrawerTitles[j]));
+        	x.setContents(y);
+        	data.add(x);
+        }
+		mDrawerList.setAdapter(new UniversalListAdapter(getLayoutInflater(),
+				R.layout.row_drawer,
+				data, new ListItemInflationAction(),
+				R.layout.header_drawer,
+				new ListHeaderInflationAction()));
         mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
+        mDrawerLayout.setDrawerListener(mDrawerToggle);
+		mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
 	}
 	
 	@Override
@@ -192,40 +224,97 @@ public class HomeActivity extends ActionBarActivity implements
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (mDrawerToggle.onOptionsItemSelected(item)) {
+        if (mDrawerToggle.onOptionsItemSelected(item))
           return true;
-        }
         return super.onOptionsItemSelected(item);
     }
 
 	private class DrawerItemClickListener implements ListView.OnItemClickListener {
 	    @Override
 	    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-	        selectItem(position);
+	        selectItem(position, view);
 	    }
 	}
 
-	private void selectItem(int position) {
+	private void selectItem(int position, View v) {
 	    mDrawerList.setItemChecked(position, true);
-	    mTitle=mDrawerTitles[position];
-	    getSupportActionBar().setTitle(mTitle);
 	    mDrawerLayout.closeDrawer(mDrawerList);
 	    
-	    Toast.makeText(getApplicationContext(), "Pressed: "+mTitle, Toast.LENGTH_LONG).show();
-	    
-//	    switch(position){
-//	    case FRAG_TYPE_ABOUT:
-//	    	
-//	    	break;
-//	    case FRAG_TYPE_SIMPLE:
-//		    
-//		    break;
-//	    case FRAG_TYPE_WEB:
-//	    	break;
-//	    case FRAG_TYPE_GRID:
-//	    	
-//	    	break;
-//	    }
+	    switch(position){
+	    case DRAWER_ITEM_METRO:
+	    	if(isMetroAvailable){
+	    		if(isMetroSelected){
+	    			v.setBackgroundColor(getResources().getColor(R.color.row_drawer_bgnd_unselected));
+	    			isMetroSelected=false;
+	    			//REMOVE OVERLAY
+	    		}else{
+	    			v.setBackgroundColor(getResources().getColor(R.color.row_drawer_bgnd_selected));
+	    			isMetroSelected=true;
+	    			//ADD OVERLAY
+	    		}	    			
+	    		return;
+	    	}	    		
+	    	break;
+	    case DRAWER_ITEM_METROBUS:
+	    	if(isMetroBusAvailable){
+	    		if(isMetroBusSelected){
+	    			v.setBackgroundColor(getResources().getColor(R.color.row_drawer_bgnd_unselected));
+	    			isMetroBusSelected=false;
+	    			//REMOVE OVERLAY
+	    		}else{
+	    			v.setBackgroundColor(getResources().getColor(R.color.row_drawer_bgnd_selected));
+	    			isMetroBusSelected=true;
+	    			//ADD OVERLAY
+	    		}
+	    		return;
+	    	}
+		    break;
+	    case DRAWER_ITEM_RTP:
+	    	if(isRTPAvailable){
+	    		if(isRTPSelected){
+	    			v.setBackgroundColor(getResources().getColor(R.color.row_drawer_bgnd_unselected));
+	    			isRTPSelected=false;
+	    			//REMOVE OVERLAY
+	    		}else{
+	    			v.setBackgroundColor(getResources().getColor(R.color.row_drawer_bgnd_selected));
+	    			isRTPSelected=true;
+	    			//ADD OVERLAY
+	    		}
+	    		return;
+	    	}
+	    	break;
+	    case DRAWER_ITEM_STE:
+	    	if(isSTEAvailable){
+	    		if(isSTESelected){
+	    			v.setBackgroundColor(getResources().getColor(R.color.row_drawer_bgnd_unselected));
+	    			isSTESelected=false;
+	    			//REMOVE OVERLAY
+	    		}else{
+	    			v.setBackgroundColor(getResources().getColor(R.color.row_drawer_bgnd_selected));
+	    			isSTESelected=true;
+	    			//ADD OVERLAY
+	    		}
+	    		return;
+	    	}
+	    	break;
+	    case DRAWER_ITEM_SUB:
+	    	if(isSUBAvailable){
+	    		if(isSUBSelected){
+	    			v.setBackgroundColor(getResources().getColor(R.color.row_drawer_bgnd_unselected));
+	    			isSUBSelected=false;
+	    			//REMOVE OVERLAY
+	    		}else{
+	    			v.setBackgroundColor(getResources().getColor(R.color.row_drawer_bgnd_selected));
+	    			isSUBSelected=true;
+	    			//ADD OVERLAY
+	    		}
+	    		return;
+	    	}
+	    	break;
+	    }
+	    Toast.makeText(getApplicationContext(),
+				R.string.act_home_toast_agencydown,
+				Toast.LENGTH_SHORT).show();
 	}
 	
 	/*
@@ -325,7 +414,7 @@ public class HomeActivity extends ActionBarActivity implements
 	            e.printStackTrace();
 	        }
 	    } else {
-	       Toast.makeText(getApplicationContext(), "Sorry. Location services not available to you", Toast.LENGTH_LONG).show();
+	       Toast.makeText(getApplicationContext(), "Error! Location services are not available", Toast.LENGTH_LONG).show();
 	    }
 	}
 		
@@ -358,27 +447,53 @@ public class HomeActivity extends ActionBarActivity implements
                 Double.toString(location.getLongitude());
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
         map.clear();
-		map.addMarker(new MarkerOptions().position(new LatLng(location.getLatitude(), location.getLongitude())).title("Marker"));
+		map.addMarker(new MarkerOptions().position(new LatLng(location.getLatitude(),
+				location.getLongitude())).title("Marker"));
 	}
 	
-	private class TestApiSetravi extends AsyncTask<Void, Void, Void>{
+	private class AgencyGetterAsyncTask extends AsyncTask<Void, Void, Void>{
 
 		@Override
 		protected Void doInBackground(Void... params) {
-			Log.d("Sirve?", "si");
+			isMetroAvailable = false;
+			isMetroBusAvailable = false;
+			isRTPAvailable = false;
+			isSTEAvailable = false;
+			isSUBAvailable = false;
 			
-			DefaultHttpClient httpClient = new DefaultHttpClient();
-			HttpPost httpPost = new HttpPost("http://107.22.236.217/transporte-df/index.php/stopsagency/METRO");
-
-			try {
-				HttpResponse httpResponse = httpClient.execute(httpPost);
-				HttpEntity httpEntity = httpResponse.getEntity();
-				String xml = EntityUtils.toString(httpEntity, "UTF-8");
-				Log.d("Data to String", xml);
-			} catch (Exception e) {
-				// TODO: handle exception
+			Agencies[] agencies = (Agencies[]) ParsingUtils.parseJSONObjectfromWeb(
+					ParsingUtils.DATA_TYPE_AGENCIES);
+			
+			for(int i=0;i<agencies.length;i++){
+				if(agencies[i].agency_id.equals("METRO")){
+					isMetroAvailable=true;
+					continue;
+				}
+				if(agencies[i].agency_id.equals("MB")){
+					isMetroBusAvailable=true;
+					continue;
+				}
+				if(agencies[i].agency_id.equals("RTP")){
+					isRTPAvailable=true;
+					continue;
+				}
+				if(agencies[i].agency_id.equals("STE")){
+					isSTEAvailable=true;
+					continue;
+				}
+				if(agencies[i].agency_id.equals("SUB")){
+					isSUBAvailable=true;
+					continue;
+				}
 			}
 			return null;
+		}
+
+		@Override
+		protected void onPostExecute(Void result) {
+			pb.setVisibility(View.GONE);
+			getSupportActionBar().setHomeButtonEnabled(true);
+			mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
 		}
 	}
 }
