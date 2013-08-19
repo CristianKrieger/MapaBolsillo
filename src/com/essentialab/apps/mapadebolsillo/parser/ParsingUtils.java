@@ -11,19 +11,18 @@ import org.json.JSONObject;
 
 import android.util.Log;
 
-import com.essentialab.apps.mapadebolsillo.parser.entities.Agencies;
+import com.essentialab.apps.mapadebolsillo.parser.entities.Agency;
+import com.essentialab.apps.mapadebolsillo.parser.entities.Route;
+import com.essentialab.apps.mapadebolsillo.parser.entities.Stop;
 
 public class ParsingUtils {
 	
 	public final static String URL_JSON_AGENCIES = "http://107.22.236.217/transporte-df/index.php/agencies";
+	public final static String URL_JSON_STOPS_PER_AGENCY_PREFIX = "http://107.22.236.217/transporte-df/index.php/stopsagency/";
 	
 	public final static int DATA_TYPE_AGENCIES = 0;
-	public final static int DATA_TYPE_ROUTES = 1;
-	public final static int DATA_TYPE_STOPS = 2;
-	public final static int DATA_TYPE_AGENCY = 3;
-	public final static int DATA_TYPE_ROUTE = 4;
-	public final static int DATA_TYPE_STOP = 5;
-	public final static int DATA_TYPE_REPORT = 6;
+	public final static int DATA_TYPE_STOPS_PER_AGENCY = 1;
+	public final static int DATA_TYPE_REPORT = 2;
 	
 	public static String downloadFile(String url){
 		//"http://107.22.236.217/transporte-df/index.php/stopsagency/METRO"
@@ -57,10 +56,10 @@ public class ParsingUtils {
 			switch(dataType){
 			case DATA_TYPE_AGENCIES:
 				jArray = jObject.getJSONArray("agencies");
-				Agencies[] agencies = new Agencies[jArray.length()];
+				Agency[] agencies = new Agency[jArray.length()];
 				for (int i = 0; i < jArray.length(); i++){
 				        JSONObject obj = jArray.getJSONObject(i);
-				        agencies[i]=new Agencies(obj.getString("agency_id"),
+				        agencies[i]=new Agency(obj.getString("agency_id"),
 				        		obj.getString("agency_name"),
 				        		obj.getString("agency_url"),
 				        		obj.getString("agency_timezone"),
@@ -68,16 +67,49 @@ public class ParsingUtils {
 				        		obj.getString("agency_phone"));
 				}
 				return agencies;
-			case DATA_TYPE_ROUTES:
-				break;
-			case DATA_TYPE_STOPS:
-				break;
-			case DATA_TYPE_AGENCY:
-				break;
-			case DATA_TYPE_ROUTE:
-				break;
-			case DATA_TYPE_STOP:
-				break;
+			case DATA_TYPE_STOPS_PER_AGENCY:
+				jArray = jObject.getJSONArray("routes");
+				
+				Route[] routes = new Route[jArray.length()];
+				for (int i = 0; i < jArray.length(); i++){
+				        JSONObject obj = jArray.getJSONObject(i);
+				        
+				        JSONArray jArray_inner = obj.getJSONArray("stops");
+				        
+				        Stop[] stops=new Stop[jArray_inner.length()];
+				        
+				        for(int j=0;j<jArray_inner.length(); j++){
+				        	JSONObject obj_in = jArray_inner.getJSONObject(j);
+				        	
+				        	stops[j]=new Stop(obj_in.getString("stop_id"),
+				        			obj_in.getString("stop_code"),
+				        			obj_in.getString("stop_name"),
+				        			obj_in.getString("stop_desc"),
+				        			obj_in.getString("stop_lat"),
+				        			obj_in.getString("stop_lon"),
+				        			obj_in.getString("zone_id"),
+				        			obj_in.getString("stop_url"),
+				        			obj_in.getString("location_type"),
+				        			obj_in.getString("parent_station"),
+				        			obj_in.getString("wheelchair_boarding"),
+				        			obj_in.getString("stop_direction"),
+				        			obj_in.getString("route_id"),
+				        			obj_in.getString("to_stop_id"));
+				        }
+				        
+				        routes[i] = new Route(obj.getString("agency_id"),
+				        		obj.getString("route_short_name"),
+				        		obj.getString("route_long_name"),
+				        		obj.getString("route_desc"),
+				        		obj.getString("route_type"),
+				        		obj.getString("route_url"),
+				        		obj.getString("route_color"),
+				        		obj.getString("route_text_color"),
+				        		obj.getString("route_bikes_allowed"),
+				        		obj.getString("route_id"),
+				        		stops);
+				}
+				return routes;
 			case DATA_TYPE_REPORT:
 				break;
 			}
@@ -89,20 +121,20 @@ public class ParsingUtils {
 		return null;
 	}
 	
-	public static Object parseJSONObjectfromWeb(int dataType){
+	/*
+	 * Getter method for SETRAVI's JSON.
+	 * Params: [Integer] dataType, object type to download.
+	 * 		   [String]  agencyId, (only required for STOPS_PER_AGENCY)
+	 * Returns: [Object] POYO based on the dataType received.
+	 */
+	public static Object parseJSONObjectfromWeb(int dataType, String agencyId){
 		String url=null;
 		switch(dataType){
 		case DATA_TYPE_AGENCIES:
 			url=URL_JSON_AGENCIES;
-		case DATA_TYPE_ROUTES:
 			break;
-		case DATA_TYPE_STOPS:
-			break;
-		case DATA_TYPE_AGENCY:
-			break;
-		case DATA_TYPE_ROUTE:
-			break;
-		case DATA_TYPE_STOP:
+		case DATA_TYPE_STOPS_PER_AGENCY:
+			url=URL_JSON_STOPS_PER_AGENCY_PREFIX+agencyId;
 			break;
 		case DATA_TYPE_REPORT:
 			break;

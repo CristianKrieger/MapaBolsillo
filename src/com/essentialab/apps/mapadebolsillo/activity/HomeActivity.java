@@ -29,7 +29,9 @@ import com.essentialab.apps.mapadebolsillo.entities.HeadedList;
 import com.essentialab.apps.mapadebolsillo.interfaces.ListHeaderInflationAction;
 import com.essentialab.apps.mapadebolsillo.interfaces.ListItemInflationAction;
 import com.essentialab.apps.mapadebolsillo.parser.ParsingUtils;
-import com.essentialab.apps.mapadebolsillo.parser.entities.Agencies;
+import com.essentialab.apps.mapadebolsillo.parser.entities.Agency;
+import com.essentialab.apps.mapadebolsillo.parser.entities.Route;
+import com.essentialab.apps.mapadebolsillo.parser.entities.Stop;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.common.GooglePlayServicesUtil;
@@ -65,6 +67,12 @@ public class HomeActivity extends ActionBarActivity implements
 	private static final int DRAWER_ITEM_RTP = 3;
 	private static final int DRAWER_ITEM_STE = 4;
 	private static final int DRAWER_ITEM_SUB = 5;
+	
+	private static final String AGENCY_ID_METRO = "METRO";
+	private static final String AGENCY_ID_SUB = "SUB";
+	private static final String AGENCY_ID_STE = "STE";
+	private static final String AGENCY_ID_RTP = "RTP";
+	private static final String AGENCY_ID_METROBUS = "MB";
 	
 	private DrawerLayout mDrawerLayout;
 	private ListView mDrawerList;
@@ -250,7 +258,7 @@ public class HomeActivity extends ActionBarActivity implements
 	    		}else{
 	    			v.setBackgroundColor(getResources().getColor(R.color.row_drawer_bgnd_selected));
 	    			isMetroSelected=true;
-	    			//ADD OVERLAY
+	    			new StopsGetterAsyncTask().execute(AGENCY_ID_METRO);
 	    		}	    			
 	    		return;
 	    	}	    		
@@ -264,7 +272,7 @@ public class HomeActivity extends ActionBarActivity implements
 	    		}else{
 	    			v.setBackgroundColor(getResources().getColor(R.color.row_drawer_bgnd_selected));
 	    			isMetroBusSelected=true;
-	    			//ADD OVERLAY
+	    			new StopsGetterAsyncTask().execute(AGENCY_ID_METROBUS);
 	    		}
 	    		return;
 	    	}
@@ -278,7 +286,7 @@ public class HomeActivity extends ActionBarActivity implements
 	    		}else{
 	    			v.setBackgroundColor(getResources().getColor(R.color.row_drawer_bgnd_selected));
 	    			isRTPSelected=true;
-	    			//ADD OVERLAY
+	    			new StopsGetterAsyncTask().execute(AGENCY_ID_RTP);
 	    		}
 	    		return;
 	    	}
@@ -292,7 +300,7 @@ public class HomeActivity extends ActionBarActivity implements
 	    		}else{
 	    			v.setBackgroundColor(getResources().getColor(R.color.row_drawer_bgnd_selected));
 	    			isSTESelected=true;
-	    			//ADD OVERLAY
+	    			new StopsGetterAsyncTask().execute(AGENCY_ID_STE);
 	    		}
 	    		return;
 	    	}
@@ -306,7 +314,7 @@ public class HomeActivity extends ActionBarActivity implements
 	    		}else{
 	    			v.setBackgroundColor(getResources().getColor(R.color.row_drawer_bgnd_selected));
 	    			isSUBSelected=true;
-	    			//ADD OVERLAY
+	    			new StopsGetterAsyncTask().execute(AGENCY_ID_SUB);
 	    		}
 	    		return;
 	    	}
@@ -461,27 +469,27 @@ public class HomeActivity extends ActionBarActivity implements
 			isSTEAvailable = false;
 			isSUBAvailable = false;
 			
-			Agencies[] agencies = (Agencies[]) ParsingUtils.parseJSONObjectfromWeb(
-					ParsingUtils.DATA_TYPE_AGENCIES);
+			Agency[] agencies = (Agency[]) ParsingUtils.parseJSONObjectfromWeb(
+					ParsingUtils.DATA_TYPE_AGENCIES, null);
 			
 			for(int i=0;i<agencies.length;i++){
-				if(agencies[i].agency_id.equals("METRO")){
+				if(agencies[i].agency_id.equals(AGENCY_ID_METRO)){
 					isMetroAvailable=true;
 					continue;
 				}
-				if(agencies[i].agency_id.equals("MB")){
+				if(agencies[i].agency_id.equals(AGENCY_ID_METROBUS)){
 					isMetroBusAvailable=true;
 					continue;
 				}
-				if(agencies[i].agency_id.equals("RTP")){
+				if(agencies[i].agency_id.equals(AGENCY_ID_RTP)){
 					isRTPAvailable=true;
 					continue;
 				}
-				if(agencies[i].agency_id.equals("STE")){
+				if(agencies[i].agency_id.equals(AGENCY_ID_STE)){
 					isSTEAvailable=true;
 					continue;
 				}
-				if(agencies[i].agency_id.equals("SUB")){
+				if(agencies[i].agency_id.equals(AGENCY_ID_SUB)){
 					isSUBAvailable=true;
 					continue;
 				}
@@ -494,6 +502,39 @@ public class HomeActivity extends ActionBarActivity implements
 			pb.setVisibility(View.GONE);
 			getSupportActionBar().setHomeButtonEnabled(true);
 			mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+		}
+	}
+	
+	private class StopsGetterAsyncTask extends AsyncTask<String, Void, Void>{
+		Route[] routes;
+		@Override
+		protected Void doInBackground(String... params) {
+			
+			routes = (Route[]) ParsingUtils.parseJSONObjectfromWeb(
+					ParsingUtils.DATA_TYPE_STOPS_PER_AGENCY, params[0]);
+			
+			//TODO: Preparar datos para inflar rutas por colores.
+			//// Tal vez utilizar una lista o algo más ordenado que un arreglo
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(Void result) {
+			//TODO: Once the data has been managed. Add code for adding Overlay
+			for(int a=0;a<routes.length;a++){
+				Log.d("ROUTE", routes[a].route_long_name);
+				Log.d("ROUTE", "------------------------");
+				Log.d("ROUTE", "------------------------");
+				for(int i=0;i<routes[a].stops.length;i++){
+					Stop x = routes[a].stops[i];
+					Log.d("STOP", "STOP: \n"
+							+x.stop_name+"\n"
+							+x.stop_lat+"\n"
+							+x.stop_lon+"\n"+"\n");
+					Log.d("STOP", "------------------------");
+				}
+				Log.d("STOP", "------------------------");
+			}
 		}
 	}
 }

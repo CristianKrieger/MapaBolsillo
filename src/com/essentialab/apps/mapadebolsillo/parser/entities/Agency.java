@@ -1,6 +1,6 @@
 package com.essentialab.apps.mapadebolsillo.parser.entities;
 
-public class Agencies {
+public class Agency {
 	public String agency_id;
 	public String agency_name;
 	public String agency_url;
@@ -8,7 +8,7 @@ public class Agencies {
 	public String agency_lang;
 	public String agency_phone;
 	
-	public Agencies(String agency_id, String agency_name, String agency_url,
+	public Agency(String agency_id, String agency_name, String agency_url,
 			String agency_timezone, String agency_lang, String agency_phone) {
 		this.agency_id = agency_id;
 		this.agency_name = agency_name;
