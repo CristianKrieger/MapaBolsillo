@@ -2,6 +2,7 @@ package com.essentialab.apps.mapadebolsillo.activity;
 
 import java.util.ArrayList;
 
+
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
@@ -255,6 +256,7 @@ public class HomeActivity extends ActionBarActivity implements
 	    			v.setBackgroundColor(getResources().getColor(R.color.row_drawer_bgnd_unselected));
 	    			isMetroSelected=false;
 	    			//REMOVE OVERLAY
+	    			map.clear();
 	    		}else{
 	    			v.setBackgroundColor(getResources().getColor(R.color.row_drawer_bgnd_selected));
 	    			isMetroSelected=true;
@@ -454,10 +456,10 @@ public class HomeActivity extends ActionBarActivity implements
         /*String msg = "Updated Location: " +
                 Double.toString(location.getLatitude()) + "," +
                 Double.toString(location.getLongitude());
-        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();*/
+        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
         map.clear();
 		map.addMarker(new MarkerOptions().position(new LatLng(location.getLatitude(),
-				location.getLongitude())).title("Marker"));
+				location.getLongitude())).title("Marker"));*/
 	}
 	
 	private class AgencyGetterAsyncTask extends AsyncTask<Void, Void, Void>{
@@ -508,9 +510,10 @@ public class HomeActivity extends ActionBarActivity implements
 	
 	private class StopsGetterAsyncTask extends AsyncTask<String, Void, Void>{
 		Route[] routes;
+		
 		@Override
 		protected Void doInBackground(String... params) {
-			
+			pb.setVisibility(View.VISIBLE);
 			routes = (Route[]) ParsingUtils.parseJSONObjectfromWeb(
 					ParsingUtils.DATA_TYPE_STOPS_PER_AGENCY, params[0]);
 			
@@ -532,10 +535,18 @@ public class HomeActivity extends ActionBarActivity implements
 							+x.stop_name+"\n"
 							+x.stop_lat+"\n"
 							+x.stop_lon+"\n"+"\n");
+					drawingStops(x.stop_name, x.stop_lat, x.stop_lon);
 					Log.d("STOP", "------------------------");
 				}
 				Log.d("STOP", "------------------------");
 			}
+			pb.setVisibility(View.GONE);
 		}
+	}
+
+	public void drawingStops(String _stopName, String _stopLan, String _stopLon) {
+		
+		LatLng position = new LatLng(Double.parseDouble(_stopLan), Double.parseDouble(_stopLon));
+		map.addMarker(new MarkerOptions().position(position).title(_stopName));
 	}
 }
