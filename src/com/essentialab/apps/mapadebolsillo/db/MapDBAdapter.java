@@ -95,15 +95,31 @@ public class MapDBAdapter {
 	 * Delete route by route_id from routes table
 	 * @param route_id
 	 */
-	public void deleteRoutesByAgency(String route_id){
-		db.delete("routes", "route_id ='"+route_id+"'", null);
+	public void deleteRoutesByAgency(String agency_id){
+		db.delete("routes", "agency_id ='"+agency_id+"'", null);
 	}
 	
-	// Delete Agency, routes and stops from agency given
+	// Delete Agency, routes and stops from agency_id and route_id given
+	/**
+	 * Delete Agency and data related to agenci_id and route_id given
+	 * @param agency_id
+	 * @param route_id
+	 */
+	public void deleteAgency(String agency_id, String route_id){
+		db.delete("agencies", "agency_id ='"+agency_id+"'", null);
+		db.delete("routes", "route_id ='"+route_id+"'", null);
+		db.delete("stops", "route_id ='"+route_id+"'", null);
+	}
+	
 	
 	// Delete route and stops from route id given
+	/**
+	 * Delete route and stops from route_id given
+	 * @param route_id
+	 */
 	public void deleteRouteById(String route_id){
-		//db.delete(table, whereClause, whereArgs)
+		db.delete("routes", "route_id ='"+route_id+"'", null);
+		db.delete("stops", "route_id ='"+route_id+"'", null);
 	}
 	
 	// Insert agency
@@ -175,7 +191,7 @@ public class MapDBAdapter {
 	// Public method
 	/**
 	 * Get data to insert on stops table
-	 * @param stop
+	 * @param Stop
 	 */
 	public void insertStop(Stop stop){
 		ContentValues cv = new ContentValues();
@@ -248,7 +264,7 @@ public class MapDBAdapter {
 	
 	/**
 	 * Get Route by route_id
-	 * @param String route_id
+	 * @param String 
 	 * @return Route Object by route_id
 	 *
 	 */
@@ -272,6 +288,25 @@ public class MapDBAdapter {
 		
 		return route;
 	}
+	
+	// Find route by route_id
+	/**
+	 * Find route by route_id
+	 * @param route_id
+	 * @return boolean
+	 */
+	public boolean existRoute(String route_id){
+		boolean exist = false;
+		Route route = new Route();
+		Cursor result = db.query("routes", null, "route_id ='"+route_id+"'", null, null, null, null);
+		if(result.moveToFirst()){
+		String flag = route.route_id = result.getString(10);
+			if(flag.length() < 0 && flag != null){
+				exist = true;
+			}
+		}
+		return exist;
+	}
 
 	private static class MapDBHelper extends SQLiteOpenHelper{
 		public MapDBHelper(Context context){
@@ -283,7 +318,7 @@ public class MapDBAdapter {
 		public void onCreate(SQLiteDatabase db) {
 			Log.i("Creating Database", "OK");
 			// Agencies Table
-			String agencyTable = "create table agencies"+
+			final String agencyTable = "create table agencies"+
 								"(_id integer primary key autoincrement,"+
 								"agency_id text null,"+
 								"agency_name text null,"+
@@ -294,7 +329,7 @@ public class MapDBAdapter {
 			db.execSQL(agencyTable);
 			
 			// Routes Table
-			String routeTable = "create table routes"+
+			final String routeTable = "create table routes"+
 								"(_id integer primary key autoincrement,"+
 								"agency_id text null,"+
 								"route_short_name text null,"+
@@ -309,7 +344,7 @@ public class MapDBAdapter {
 			db.execSQL(routeTable);
 			
 			// Stops Table
-			String stopTable = "create table stops"+
+			final String stopTable = "create table stops"+
 								"(_id integer primary key autoincrement,"+
 								"stop_id text null,"+
 								"stop_code text null,"+
