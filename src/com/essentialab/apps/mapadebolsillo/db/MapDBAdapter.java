@@ -1,11 +1,14 @@
 package com.essentialab.apps.mapadebolsillo.db;
 
+import java.util.ArrayList;
+
 import com.essentialab.apps.mapadebolsillo.parser.entities.Agency;
 import com.essentialab.apps.mapadebolsillo.parser.entities.Route;
 import com.essentialab.apps.mapadebolsillo.parser.entities.Stop;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -129,6 +132,81 @@ public class MapDBAdapter {
 		cv.put("to_stop_id", stop.to_stop_id);
 		
 		_insertStop(cv);
+	}
+	
+	/**
+	 * Get agency by agency_id
+	 * @param String agency_id
+	 * @return Agency object by agency_id from database
+	 *
+	 */
+	public Agency getAgencyById(String agency_id){
+		Agency agency = new Agency();
+			
+		Cursor result = db.query("agencies", null, "agency_id ='"+agency_id+"'",null, null, null, null);
+		if(result.moveToFirst()){
+			agency.agency_id = result.getString(0);
+			agency.agency_name = result.getString(1);
+			agency.agency_url = result.getString(2);
+			agency.agency_timezone = result.getString(3);
+			agency.agency_lang = result.getString(4);
+			agency.agency_phone = result.getString(5); 
+		}
+		return agency;
+	}
+	
+	/**
+	 * Get all Agencies from database
+	 * @return All Agencies
+	 *
+	 */
+	public ArrayList<Agency> getAllAgencies(){
+		ArrayList<Agency> agencies = new ArrayList<Agency>();
+		
+		Cursor result = db.query("agencies", null, null, null, null, null, null);
+		
+		if(result.moveToFirst()){
+			do{
+				Agency agency = new Agency();
+				agency.agency_id = result.getString(1);
+				agency.agency_name = result.getString(2);
+				agency.agency_url = result.getString(3);
+				agency.agency_timezone = result.getString(4);
+				agency.agency_lang = result.getString(5);
+				agency.agency_phone = result.getString(6); 
+				
+				agencies.add(agency);
+			}while(result.moveToNext());
+		}
+		
+		return agencies;
+	}
+	
+	/**
+	 * Get Route by route_id
+	 * @param String route_id
+	 * @return Route Object by route_id
+	 *
+	 */
+	public Route getRouteById(String route_id){
+		Route route = new Route();
+		
+		Cursor result = db.query("routes", null, "route_id ='"+route_id+"'", null, null, null, null);
+		
+		if(result.moveToFirst()){
+			route.agency_id = result.getString(1);
+			route.route_short_name = result.getString(2);
+			route.route_long_name = result.getString(3);
+			route.route_desc = result.getString(4);
+			route.route_type = result.getString(5);
+			route.route_url = result.getString(6);
+			route.route_color = result.getString(7);
+			route.route_text_color = result.getString(8);
+			route.route_bikes_allowed = result.getString(9);
+			route.route_id = result.getString(10);
+		}
+		
+		return route;
 	}
 
 	private static class MapDBHelper extends SQLiteOpenHelper{

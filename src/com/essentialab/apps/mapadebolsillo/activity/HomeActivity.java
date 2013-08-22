@@ -44,6 +44,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 public class HomeActivity extends ActionBarActivity implements 
@@ -548,5 +549,9 @@ public class HomeActivity extends ActionBarActivity implements
 		
 		LatLng position = new LatLng(Double.parseDouble(_stopLan), Double.parseDouble(_stopLon));
 		map.addMarker(new MarkerOptions().position(position).title(_stopName));
+		
+		Marker algo = map.addMarker(new MarkerOptions().position(position).title(_stopName));
+		
+		Log.i("Marker algo Id", algo.getId());
 	}
 }

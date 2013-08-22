@@ -8,6 +8,10 @@ public class Agency {
 	public String agency_lang;
 	public String agency_phone;
 	
+	public Agency(){
+		
+	}
+	
 	public Agency(String agency_id, String agency_name, String agency_url,
 			String agency_timezone, String agency_lang, String agency_phone) {
 		this.agency_id = agency_id;

@@ -13,6 +13,10 @@ public class Route {
 	public String route_id;
 	public Stop[] stops;
 	
+	public Route(){
+		
+	}
+	
 	public Route(String agency_id, String route_short_name,
 			String route_long_name, String route_desc, String route_type,
 			String route_url, String route_color, String route_text_color,
