@@ -188,7 +188,9 @@ public class HomeActivity extends ActionBarActivity implements
         mDrawerLayout.setDrawerListener(mDrawerToggle);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setTitle("");
         getSupportActionBar().setHomeButtonEnabled(true);
+        getSupportActionBar().setBackgroundDrawable(getResources().getDrawable(R.drawable.actionbar_background));
         
         int[] mDrawables = {
         	R.drawable.ic_launcher,
@@ -347,6 +349,7 @@ public class HomeActivity extends ActionBarActivity implements
 	protected void onStop() {
 	    // Disconnecting the client invalidates it.
 	    mLocationClient.disconnect();
+	    myTask.cancel(true);
 	    super.onStop();
 	}
 	
@@ -473,6 +476,8 @@ public class HomeActivity extends ActionBarActivity implements
 			isSTEAvailable = false;
 			isSUBAvailable = false;
 			
+			if(isCancelled()) return null;
+			
 			MapDBAdapter db = new MapDBAdapter(getApplicationContext());
 			db.open();
 			
@@ -480,6 +485,7 @@ public class HomeActivity extends ActionBarActivity implements
 					ParsingUtils.DATA_TYPE_AGENCIES, null);
 			
 			for(int i=0;i<agencies.length;i++){
+				if(isCancelled()) break;
 				db.insertAgency(agencies[i]);
 				String agencyId=agencies[i].agency_id;
 				
@@ -487,11 +493,16 @@ public class HomeActivity extends ActionBarActivity implements
 						ParsingUtils.DATA_TYPE_STOPS_PER_AGENCY, agencyId);
 				
 				for(int j=0;j<routes.length;j++){
+					if(isCancelled()) break;
 					db.insertRoute(routes[j]);
+					
 					for(int k=0;k<routes[j].stops.length;k++){
+						if(isCancelled()) break;
 						db.insertStop(routes[j].stops[k]);
 					}
 				}
+				
+				if(isCancelled()) break;
 				
 				if(agencyId.equals(AGENCY_ID_METRO)){
 					isMetroAvailable=true;
@@ -525,45 +536,13 @@ public class HomeActivity extends ActionBarActivity implements
 			getSupportActionBar().setHomeButtonEnabled(true);
 			mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
 		}
+
+		@Override
+		protected void onCancelled(Void result) {
+			//TODO: Clear DB contents
+			Log.e("HOME-ASYNCTASK", "Download was interrupted");
+		}
 	}
-	
-//	private class StopsGetterAsyncTask extends AsyncTask<String, Void, Void>{
-//		
-//		@Override
-//		protected Void doInBackground(String... params) {
-//			pd.setVisibility(View.VISIBLE);
-//			
-//			
-//			
-//			
-//			
-//			
-//			//db.insertAgency(agenci);
-//			
-//			return null;
-//		}
-//
-//		@Override
-//		protected void onPostExecute(Void result) {
-//			//TODO: Once the data has been managed. Add code for adding Overlay
-////			for(int a=0;a<routes.length;a++){
-////				Log.d("ROUTE", routes[a].route_long_name);
-////				Log.d("ROUTE", "------------------------");
-////				Log.d("ROUTE", "------------------------");
-////				for(int i=0;i<routes[a].stops.length;i++){
-////					Stop x = routes[a].stops[i];
-////					Log.d("STOP", "STOP: \n"
-////							+x.stop_name+"\n"
-////							+x.stop_lat+"\n"
-////							+x.stop_lon+"\n"+"\n");
-////					drawingStops(x.stop_name, x.stop_lat, x.stop_lon);
-////					Log.d("STOP", "------------------------");
-////				}
-////				Log.d("STOP", "------------------------");
-////			}
-//			pd.setVisibility(View.GONE);
-//		}
-//	}
 
 	public void drawingStops(String _stopName, String _stopLan, String _stopLon) {
 		LatLng position = new LatLng(Double.parseDouble(_stopLan), Double.parseDouble(_stopLon));
