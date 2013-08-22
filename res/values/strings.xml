@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Mapa de Bolsillo</string>
+    <string name="action_settings">Settings</string>
+    
+    <string name="act_home_drawer_open">Open Drawer</string>
+    <string name="act_home_drawer_close">Close Drawer</string>
+	
+    <string-array name="act_home_drawer_array">
+        <item>Metro</item>
+        <item>Metrobús</item>
+        <item>RTP</item>
+        <item>Transportes Eléctricos</item>
+        <item>Ferrocarril Suburbano</item>
+    </string-array>
+    
+     <string name="act_home_toast_agencydown">No hay datos disponibles para este servicio por ahora.</string>
+</resources>

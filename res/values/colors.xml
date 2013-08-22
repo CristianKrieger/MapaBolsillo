@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="act_home_drawer_background">#F2F2F2</color>
+    
+    <color name="row_drawer_text">#000</color>
+    <color name="row_drawer_bgnd_selected">#33b5e5</color>
+    <color name="row_drawer_bgnd_unselected">#0033b5e5</color>
+    
+    <!-- LISTVIEW HEADER -->
+    <color name="lv_header_txt_color">#33b5e5</color>
+    <color name="lv_header_underline">#33b5e5</color>
+    
+    <!-- LISTVIEW ROW ITEM -->
+    <color name="lv_row_time_background">#EAEAEA</color>
+    <color name="lv_row_txt_location">#828282</color>
+    
+    
+</resources>
