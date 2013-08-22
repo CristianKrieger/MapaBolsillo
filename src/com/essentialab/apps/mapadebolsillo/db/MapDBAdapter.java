@@ -98,8 +98,8 @@ public class MapDBAdapter {
 		cv.put("route_long_name", route.route_long_name);
 		cv.put("route_desc", route.route_desc);
 		cv.put("route_type", route.route_type);
-		cv.put("route_url", route.route_url);
-		cv.put("route_color", route.route_color);
+	//	cv.put("routWe", route.route_url);
+		cv.put("routeColor", route.route_color);
 		cv.put("route_text_color", route.route_text_color);
 		cv.put("route_bikes_allowed", route.route_bikes_allowed);
 		cv.put("route_id", route.route_id);
@@ -199,7 +199,7 @@ public class MapDBAdapter {
 			route.route_long_name = result.getString(3);
 			route.route_desc = result.getString(4);
 			route.route_type = result.getString(5);
-			route.route_url = result.getString(6);
+			//route.route_url = result.getString(6);
 			route.route_color = result.getString(7);
 			route.route_text_color = result.getString(8);
 			route.route_bikes_allowed = result.getString(9);
@@ -237,8 +237,8 @@ public class MapDBAdapter {
 								"route_long_name text,"+
 								"route_desc text,"+
 								"route_type text"+
-								"route_url text,"+
-								"route_color text,"+
+					//			"routWe text, null"+
+								"routeColor text,"+
 								"route_text_color text,"+
 								"route_bikes_allowed text,"+
 								"route_id text);";
@@ -267,8 +267,10 @@ public class MapDBAdapter {
 		// Update DB if is necessary
 		@Override
 		public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-			// TODO Auto-generated method stub
 			
+			db.execSQL("DROP TABLE IF EXIST routes");
+			db.execSQL("DROP TABLE IF EXIST agencies");
+			db.execSQL("DROP TABLE IF EXIST stops");
 		}
 	}
 }
