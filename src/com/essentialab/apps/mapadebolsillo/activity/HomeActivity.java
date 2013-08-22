@@ -139,7 +139,7 @@ public class HomeActivity extends ActionBarActivity implements
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 	    super.onCreate(savedInstanceState);
-	    requestWindowFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
+	    supportRequestWindowFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
 	    setContentView(R.layout.activity_home);
 	    pd = findViewById(R.id.act_home_progressdialog);
 	    
