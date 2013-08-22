@@ -28,50 +28,98 @@ public class MapDBAdapter {
 	private boolean _isConnected = false;
 	
 	// Construct
+	/**
+	 * Initialize the database
+	 * @param _context
+	 */
 	public MapDBAdapter(Context _context){
 		context = _context;
 		dbHelper = new MapDBHelper(context);
 	}
 	
 	// Open connection to DB
+	/**
+	 * Open the connection with database
+	 * @throws SQLException
+	 */
 	public void open() throws SQLException{
 		db = dbHelper.getWritableDatabase();
 		_isConnected = true;
 	}
 	
 	// Close connection to DB
+	/**
+	 * Close the connection with database
+	 */
 	public void close(){
 		db.close();
 		_isConnected = false;
 	}
 	
 	// Status connection to DB
+	/**
+	 * Check the status connection with database
+	 * @return boolean 
+	 */
 	public boolean isConnected(){
 		return _isConnected;
 	}
 	
 	// Empty Tables
 	// Empty agencies table
+	/**
+	 * Delete content from agencies table
+	 */
 	public void emptyAgenciesTable(){
 		db.delete("agencies", null, null);
 	}
 	
 	// Empty routes table
+	/**
+	 * Delete content from routes table
+	 */
 	public void emptyRoutesTable(){
 		db.delete("routes", null, null);
 	}
 	
 	// Empty stops table
+	/**
+	 * Delete content from stops table
+	 */
 	public void emptyStopsTable(){
 		db.delete("stops", null, null);
 	}
 	
+	// Delete routes by agency
+	/**
+	 * Delete route by route_id from routes table
+	 * @param route_id
+	 */
+	public void deleteRoutesByAgency(String route_id){
+		db.delete("routes", "route_id ='"+route_id+"'", null);
+	}
+	
+	// Delete Agency, routes and stops from agency given
+	
+	// Delete route and stops from route id given
+	public void deleteRouteById(String route_id){
+		
+	}
+	
 	// Insert agency
 	// Private method
+	/**
+	 * Insert data on agencies table
+	 * @param cv
+	 */
 	private void _insertAgency(ContentValues cv){
 		db.insert("agencies", null, cv);
 	}
 	// Public method
+	/**
+	 * Get data to insert on agencies table
+	 * @param agency
+	 */
 	public void insertAgency(Agency agency){
 		ContentValues cv = new ContentValues();
 		cv.put("agency_id", agency.agency_id);
@@ -86,10 +134,18 @@ public class MapDBAdapter {
 	
 	// Insert route
 	// Private method
+	/**
+	 * Insert data on routes table
+	 * @param cv
+	 */
 	private void _insertRoute(ContentValues cv){
 		db.insert("routes", null, cv);
 	}
 	// Public method
+	/**
+	 * Get data to insert on routes table
+	 * @param route
+	 */
 	public void insertRoute(Route route){
 		ContentValues cv = new ContentValues();
 		
@@ -109,10 +165,18 @@ public class MapDBAdapter {
 	
 	// Insert Stop
 	// Private method
+	/**
+	 * Insert data on stops table
+	 * @param cv
+	 */
 	private void _insertStop(ContentValues cv){
 		db.insert("stops", null, cv);
 	}
 	// Public method
+	/**
+	 * Get data to insert on stops table
+	 * @param stop
+	 */
 	public void insertStop(Stop stop){
 		ContentValues cv = new ContentValues();
 		
@@ -237,7 +301,7 @@ public class MapDBAdapter {
 								"route_long_name text null,"+
 								"route_desc text null,"+
 								"route_type text null,"+
-						//		"routWe text null,"+
+								"routWe text null,"+
 								"routeColor text null,"+
 								"route_text_color text null,"+
 								"route_bikes_allowed text null,"+
@@ -271,6 +335,7 @@ public class MapDBAdapter {
 			db.execSQL("DROP TABLE IF EXIST routes");
 			db.execSQL("DROP TABLE IF EXIST agencies");
 			db.execSQL("DROP TABLE IF EXIST stops");
+			onCreate(db);
 		}
 	}
 }
