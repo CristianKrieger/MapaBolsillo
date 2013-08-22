@@ -221,46 +221,46 @@ public class MapDBAdapter {
 			// Agencies Table
 			String agencyTable = "create table agencies"+
 								"(_id integer primary key autoincrement,"+
-								"agency_id text,"+
-								"agency_name text,"+
-								"agency_url text,"+
-								"agency_timezone text,"+
-								"agency_lang text,"+
-								"agency_phone text);";
+								"agency_id text null,"+
+								"agency_name text null,"+
+								"agency_url text null,"+
+								"agency_timezone text null,"+
+								"agency_lang text null,"+
+								"agency_phone text null);";
 			db.execSQL(agencyTable);
 			
 			// Routes Table
 			String routeTable = "create table routes"+
 								"(_id integer primary key autoincrement,"+
-								"agency_id text,"+
-								"route_short_name text,"+
-								"route_long_name text,"+
-								"route_desc text,"+
-								"route_type text"+
-					//			"routWe text, null"+
-								"routeColor text,"+
-								"route_text_color text,"+
-								"route_bikes_allowed text,"+
-								"route_id text);";
+								"agency_id text null,"+
+								"route_short_name text null,"+
+								"route_long_name text null,"+
+								"route_desc text null,"+
+								"route_type text null,"+
+						//		"routWe text null,"+
+								"routeColor text null,"+
+								"route_text_color text null,"+
+								"route_bikes_allowed text null,"+
+								"route_id text null);";
 			db.execSQL(routeTable);
 			
 			// Stops Table
 			String stopTable = "create table stops"+
 								"(_id integer primary key autoincrement,"+
-								"stop_id text,"+
-								"stop_code text,"+
-								"stop_name text,"+
-								"stop_desc text,"+
-								"stop_lat text,"+
-								"stop_lon text,"+
-								"zone_id text,"+
-								"stop_url text,"+
-								"location_type text,"+
-								"parent_station text,"+
-								"wheelchair_boarding text,"+
-								"stop_direction text,"+
-								"route_id text,"+
-								"to_stop_id text);";
+								"stop_id text null,"+
+								"stop_code text null,"+
+								"stop_name text null,"+
+								"stop_desc text null,"+
+								"stop_lat text null,"+
+								"stop_lon text null,"+
+								"zone_id text null,"+
+								"stop_url text null,"+
+								"location_type text null,"+
+								"parent_station text null,"+
+								"wheelchair_boarding text null,"+
+								"stop_direction text null,"+
+								"route_id text null,"+
+								"to_stop_id text null);";
 			db.execSQL(stopTable);
 		}
 
