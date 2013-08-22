@@ -2,7 +2,6 @@ package com.essentialab.apps.mapadebolsillo.activity;
 
 import java.util.ArrayList;
 
-
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
@@ -20,11 +19,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.essentialab.apps.mapadebolsillo.R;
 import com.essentialab.apps.mapadebolsillo.adapter.UniversalListAdapter;
+import com.essentialab.apps.mapadebolsillo.db.MapDBAdapter;
 import com.essentialab.apps.mapadebolsillo.entities.DrawerItem;
 import com.essentialab.apps.mapadebolsillo.entities.HeadedList;
 import com.essentialab.apps.mapadebolsillo.interfaces.ListHeaderInflationAction;
@@ -32,7 +31,6 @@ import com.essentialab.apps.mapadebolsillo.interfaces.ListItemInflationAction;
 import com.essentialab.apps.mapadebolsillo.parser.ParsingUtils;
 import com.essentialab.apps.mapadebolsillo.parser.entities.Agency;
 import com.essentialab.apps.mapadebolsillo.parser.entities.Route;
-import com.essentialab.apps.mapadebolsillo.parser.entities.Stop;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.common.GooglePlayServicesUtil;
@@ -81,12 +79,12 @@ public class HomeActivity extends ActionBarActivity implements
 	private ActionBarDrawerToggle mDrawerToggle;
 	private String[] mDrawerTitles;
 	
-	private ProgressBar pb;
+	private View pd;
 	
 	private SupportMapFragment mapFragment;
 	private GoogleMap map;
 	private LocationClient mLocationClient;
-	private AgencyGetterAsyncTask myTask;
+	private DataGetterAsyncTask myTask;
 	
 	// Milliseconds per second
     private static final int MILLISECONDS_PER_SECOND = 1000;
@@ -137,7 +135,7 @@ public class HomeActivity extends ActionBarActivity implements
 	protected void onCreate(Bundle savedInstanceState) {
 	    super.onCreate(savedInstanceState);
 	    setContentView(R.layout.activity_home);
-	    pb=(ProgressBar) findViewById(R.id.act_home_pb);
+	    pd = findViewById(R.id.act_home_progressdialog);
 	    
 	    initializeMap();
 	    startNavigationDrawer();
@@ -160,7 +158,7 @@ public class HomeActivity extends ActionBarActivity implements
 	    
 	    mLocationClient = new LocationClient(this, this, this);
 	    
-	    myTask = new AgencyGetterAsyncTask();
+	    myTask = new DataGetterAsyncTask();
 	    myTask.execute();
 	}
 	
@@ -246,9 +244,7 @@ public class HomeActivity extends ActionBarActivity implements
 	}
 
 	private void selectItem(int position, View v) {
-	    mDrawerList.setItemChecked(position, true);
-	    mDrawerLayout.closeDrawer(mDrawerList);
-	    
+		boolean validSelection=false;
 	    switch(position){
 	    case DRAWER_ITEM_METRO:
 	    	if(isMetroAvailable){
@@ -260,9 +256,9 @@ public class HomeActivity extends ActionBarActivity implements
 	    		}else{
 	    			v.setBackgroundColor(getResources().getColor(R.color.row_drawer_bgnd_selected));
 	    			isMetroSelected=true;
-	    			new StopsGetterAsyncTask().execute(AGENCY_ID_METRO);
+//	    			new StopsGetterAsyncTask().execute(AGENCY_ID_METRO);
 	    		}	    			
-	    		return;
+	    		validSelection=true;
 	    	}	    		
 	    	break;
 	    case DRAWER_ITEM_METROBUS:
@@ -274,9 +270,9 @@ public class HomeActivity extends ActionBarActivity implements
 	    		}else{
 	    			v.setBackgroundColor(getResources().getColor(R.color.row_drawer_bgnd_selected));
 	    			isMetroBusSelected=true;
-	    			new StopsGetterAsyncTask().execute(AGENCY_ID_METROBUS);
+//	    			new StopsGetterAsyncTask().execute(AGENCY_ID_METROBUS);
 	    		}
-	    		return;
+	    		validSelection=true;
 	    	}
 		    break;
 	    case DRAWER_ITEM_RTP:
@@ -288,9 +284,9 @@ public class HomeActivity extends ActionBarActivity implements
 	    		}else{
 	    			v.setBackgroundColor(getResources().getColor(R.color.row_drawer_bgnd_selected));
 	    			isRTPSelected=true;
-	    			new StopsGetterAsyncTask().execute(AGENCY_ID_RTP);
+//	    			new StopsGetterAsyncTask().execute(AGENCY_ID_RTP);
 	    		}
-	    		return;
+	    		validSelection=true;
 	    	}
 	    	break;
 	    case DRAWER_ITEM_STE:
@@ -302,9 +298,9 @@ public class HomeActivity extends ActionBarActivity implements
 	    		}else{
 	    			v.setBackgroundColor(getResources().getColor(R.color.row_drawer_bgnd_selected));
 	    			isSTESelected=true;
-	    			new StopsGetterAsyncTask().execute(AGENCY_ID_STE);
+//	    			new StopsGetterAsyncTask().execute(AGENCY_ID_STE);
 	    		}
-	    		return;
+	    		validSelection=true;
 	    	}
 	    	break;
 	    case DRAWER_ITEM_SUB:
@@ -316,15 +312,19 @@ public class HomeActivity extends ActionBarActivity implements
 	    		}else{
 	    			v.setBackgroundColor(getResources().getColor(R.color.row_drawer_bgnd_selected));
 	    			isSUBSelected=true;
-	    			new StopsGetterAsyncTask().execute(AGENCY_ID_SUB);
+//	    			new StopsGetterAsyncTask().execute(AGENCY_ID_SUB);
 	    		}
-	    		return;
+	    		validSelection=true;
 	    	}
 	    	break;
 	    }
-	    Toast.makeText(getApplicationContext(),
-				R.string.act_home_toast_agencydown,
-				Toast.LENGTH_SHORT).show();
+	    if(validSelection){
+	    	mDrawerList.setItemChecked(position, true);
+		    mDrawerLayout.closeDrawer(mDrawerList);
+	    }else
+		    Toast.makeText(getApplicationContext(),
+					R.string.act_home_toast_agencydown,
+					Toast.LENGTH_SHORT).show();
 	}
 	
 	/*
@@ -462,7 +462,7 @@ public class HomeActivity extends ActionBarActivity implements
 				location.getLongitude())).title("Marker"));*/
 	}
 	
-	private class AgencyGetterAsyncTask extends AsyncTask<Void, Void, Void>{
+	private class DataGetterAsyncTask extends AsyncTask<Void, Void, Void>{
 
 		@Override
 		protected Void doInBackground(Void... params) {
@@ -472,80 +472,99 @@ public class HomeActivity extends ActionBarActivity implements
 			isSTEAvailable = false;
 			isSUBAvailable = false;
 			
+			MapDBAdapter db = new MapDBAdapter(getApplicationContext());
+			db.open();
+			
 			Agency[] agencies = (Agency[]) ParsingUtils.parseJSONObjectfromWeb(
 					ParsingUtils.DATA_TYPE_AGENCIES, null);
 			
 			for(int i=0;i<agencies.length;i++){
-				if(agencies[i].agency_id.equals(AGENCY_ID_METRO)){
+				db.insertAgency(agencies[i]);
+				String agencyId=agencies[i].agency_id;
+				
+				Route[] routes = (Route[]) ParsingUtils.parseJSONObjectfromWeb(
+						ParsingUtils.DATA_TYPE_STOPS_PER_AGENCY, agencyId);
+				
+				for(int j=0;j<routes.length;j++){
+					db.insertRoute(routes[j]);
+					for(int k=0;k<routes[j].stops.length;k++){
+						db.insertStop(routes[j].stops[k]);
+					}
+				}
+				
+				if(agencyId.equals(AGENCY_ID_METRO)){
 					isMetroAvailable=true;
 					continue;
 				}
-				if(agencies[i].agency_id.equals(AGENCY_ID_METROBUS)){
+				if(agencyId.equals(AGENCY_ID_METROBUS)){
 					isMetroBusAvailable=true;
 					continue;
 				}
-				if(agencies[i].agency_id.equals(AGENCY_ID_RTP)){
+				if(agencyId.equals(AGENCY_ID_RTP)){
 					isRTPAvailable=true;
 					continue;
 				}
-				if(agencies[i].agency_id.equals(AGENCY_ID_STE)){
+				if(agencyId.equals(AGENCY_ID_STE)){
 					isSTEAvailable=true;
 					continue;
 				}
-				if(agencies[i].agency_id.equals(AGENCY_ID_SUB)){
+				if(agencyId.equals(AGENCY_ID_SUB)){
 					isSUBAvailable=true;
 					continue;
 				}
-			}
+			}		
+			db.close();
+			
 			return null;
 		}
 
 		@Override
 		protected void onPostExecute(Void result) {
-			pb.setVisibility(View.GONE);
+			pd.setVisibility(View.GONE);
 			getSupportActionBar().setHomeButtonEnabled(true);
 			mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
 		}
 	}
 	
-	private class StopsGetterAsyncTask extends AsyncTask<String, Void, Void>{
-		Route[] routes;
-		
-		@Override
-		protected Void doInBackground(String... params) {
-			pb.setVisibility(View.VISIBLE);
-			routes = (Route[]) ParsingUtils.parseJSONObjectfromWeb(
-					ParsingUtils.DATA_TYPE_STOPS_PER_AGENCY, params[0]);
-			
-			//TODO: Preparar datos para inflar rutas por colores.
-			//// Tal vez utilizar una lista o algo más ordenado que un arreglo
-			return null;
-		}
-
-		@Override
-		protected void onPostExecute(Void result) {
-			//TODO: Once the data has been managed. Add code for adding Overlay
-			for(int a=0;a<routes.length;a++){
-				Log.d("ROUTE", routes[a].route_long_name);
-				Log.d("ROUTE", "------------------------");
-				Log.d("ROUTE", "------------------------");
-				for(int i=0;i<routes[a].stops.length;i++){
-					Stop x = routes[a].stops[i];
-					Log.d("STOP", "STOP: \n"
-							+x.stop_name+"\n"
-							+x.stop_lat+"\n"
-							+x.stop_lon+"\n"+"\n");
-					drawingStops(x.stop_name, x.stop_lat, x.stop_lon);
-					Log.d("STOP", "------------------------");
-				}
-				Log.d("STOP", "------------------------");
-			}
-			pb.setVisibility(View.GONE);
-		}
-	}
+//	private class StopsGetterAsyncTask extends AsyncTask<String, Void, Void>{
+//		
+//		@Override
+//		protected Void doInBackground(String... params) {
+//			pd.setVisibility(View.VISIBLE);
+//			
+//			
+//			
+//			
+//			
+//			
+//			//db.insertAgency(agenci);
+//			
+//			return null;
+//		}
+//
+//		@Override
+//		protected void onPostExecute(Void result) {
+//			//TODO: Once the data has been managed. Add code for adding Overlay
+////			for(int a=0;a<routes.length;a++){
+////				Log.d("ROUTE", routes[a].route_long_name);
+////				Log.d("ROUTE", "------------------------");
+////				Log.d("ROUTE", "------------------------");
+////				for(int i=0;i<routes[a].stops.length;i++){
+////					Stop x = routes[a].stops[i];
+////					Log.d("STOP", "STOP: \n"
+////							+x.stop_name+"\n"
+////							+x.stop_lat+"\n"
+////							+x.stop_lon+"\n"+"\n");
+////					drawingStops(x.stop_name, x.stop_lat, x.stop_lon);
+////					Log.d("STOP", "------------------------");
+////				}
+////				Log.d("STOP", "------------------------");
+////			}
+//			pd.setVisibility(View.GONE);
+//		}
+//	}
 
 	public void drawingStops(String _stopName, String _stopLan, String _stopLon) {
-		
 		LatLng position = new LatLng(Double.parseDouble(_stopLan), Double.parseDouble(_stopLon));
 		map.addMarker(new MarkerOptions().position(position).title(_stopName));
 	}
