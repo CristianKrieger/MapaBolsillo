@@ -3,7 +3,6 @@
     android:id="@+id/act_home_drawerlayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-    
     <FrameLayout
         android:id="@+id/act_home_container_root"
         android:layout_width="match_parent"
@@ -12,9 +11,22 @@
 	        android:layout_width="match_parent"
 	        android:layout_height="match_parent"
 	        android:name="com.google.android.gms.maps.SupportMapFragment"/>
-        <ProgressBar android:id="@+id/act_home_pb"
-            style="@style/Activity_Circle"
-            android:layout_gravity="center"/>
+        <LinearLayout android:padding="20dp"
+            android:layout_width="wrap_content"
+        	android:layout_height="wrap_content"
+        	android:id="@+id/act_home_progressdialog"
+        	android:layout_gravity="center"
+        	android:orientation="vertical"
+        	android:background="#77000000">
+        	<TextView android:layout_width="wrap_content"
+        	    android:layout_height="wrap_content"
+        	    android:layout_marginBottom="10dp"
+        	    android:textColor="#fff"
+        	    android:textSize="14sp"
+        	    android:text="Cargando Datos del Servidor..."/>
+        	<ProgressBar style="@style/Activity_Circle"
+	            android:layout_gravity="center"/>
+        </LinearLayout>
     </FrameLayout>
 
     <ListView android:id="@+id/act_home_drawer"
