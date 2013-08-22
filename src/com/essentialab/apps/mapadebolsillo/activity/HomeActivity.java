@@ -17,6 +17,8 @@ import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -135,6 +137,7 @@ public class HomeActivity extends ActionBarActivity implements
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 	    super.onCreate(savedInstanceState);
+	    requestWindowFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
 	    setContentView(R.layout.activity_home);
 	    pd = findViewById(R.id.act_home_progressdialog);
 	    
@@ -485,6 +488,7 @@ public class HomeActivity extends ActionBarActivity implements
 					ParsingUtils.DATA_TYPE_AGENCIES, null);
 			
 			for(int i=0;i<agencies.length;i++){
+				Log.d("DEBUG", "AGENCY "+Integer.toString(i+1)+" OF "+Integer.toString(agencies.length));
 				if(isCancelled()) break;
 				db.insertAgency(agencies[i]);
 				String agencyId=agencies[i].agency_id;
@@ -493,11 +497,13 @@ public class HomeActivity extends ActionBarActivity implements
 						ParsingUtils.DATA_TYPE_STOPS_PER_AGENCY, agencyId);
 				
 				for(int j=0;j<routes.length;j++){
+					Log.d("DEBUG", "ROUTE "+Integer.toString(j+1)+" OF "+Integer.toString(routes.length));
 					if(isCancelled()) break;
 					db.insertRoute(routes[j]);
 					
 					for(int k=0;k<routes[j].stops.length;k++){
 						if(isCancelled()) break;
+						Log.d("DEBUG", "STOP "+Integer.toString(k+1)+" OF "+Integer.toString(routes[j].stops.length));
 						db.insertStop(routes[j].stops[k]);
 					}
 				}
