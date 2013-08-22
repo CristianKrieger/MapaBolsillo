@@ -155,7 +155,7 @@ public class MapDBAdapter {
 		cv.put("route_desc", route.route_desc);
 		cv.put("route_type", route.route_type);
 	//	cv.put("routWe", route.route_url);
-		cv.put("routeColor", route.route_color);
+//		cv.put("routeColor", route.route_color);
 		cv.put("route_text_color", route.route_text_color);
 		cv.put("route_bikes_allowed", route.route_bikes_allowed);
 		cv.put("route_id", route.route_id);
