@@ -133,7 +133,7 @@ public class HomeActivity extends ActionBarActivity implements
 	    }
 	}
 	
-//	@SuppressLint("InlinedApi")
+	@SuppressLint("InlinedApi")
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 	    super.onCreate(savedInstanceState);
@@ -162,8 +162,8 @@ public class HomeActivity extends ActionBarActivity implements
 	    
 	    mLocationClient = new LocationClient(this, this, this);
 	    
-	    myTask = new DataGetterAsyncTask();
-	    myTask.execute();
+//	    myTask = new DataGetterAsyncTask();
+//	    myTask.execute();
 	}
 	
 	private void startNavigationDrawer(){
@@ -352,7 +352,7 @@ public class HomeActivity extends ActionBarActivity implements
 	protected void onStop() {
 	    // Disconnecting the client invalidates it.
 	    mLocationClient.disconnect();
-	    myTask.cancel(true);
+//	    myTask.cancel(true);
 	    super.onStop();
 	}
 	
