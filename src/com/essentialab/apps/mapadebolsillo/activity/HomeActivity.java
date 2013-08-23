@@ -17,9 +17,11 @@ import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.essentialab.apps.mapadebolsillo.R;
@@ -162,8 +164,42 @@ public class HomeActivity extends ActionBarActivity implements
 	    
 	    mLocationClient = new LocationClient(this, this, this);
 	    
-//	    myTask = new DataGetterAsyncTask();
-//	    myTask.execute();
+	    myTask = new DataGetterAsyncTask();
+	    myTask.execute();
+	    resetLocationButton();
+	}
+	
+	public void resetLocationButton(){
+		// Get a reference to the zoom buttons and the position button.
+	    ViewGroup v1 = (ViewGroup)mapFragment.getView();
+	    ViewGroup v2 = (ViewGroup)v1.getChildAt(0);
+	    ViewGroup v3 = (ViewGroup)v2.getChildAt(0);
+	    ViewGroup v4 = (ViewGroup)v3.getChildAt(1);
+
+	    // Position button
+	    View position =  (View)v4.getChildAt(0);
+	    int positionWidth = position.getLayoutParams().width;
+	    int positionHeight = position.getLayoutParams().height;
+	    
+		// Move Layout Position button.
+	    RelativeLayout.LayoutParams positionParams = new RelativeLayout.LayoutParams(positionWidth,positionHeight);
+	    int margin = positionWidth/5;
+	    positionParams.setMargins(0, 0, 0, margin);
+	    positionParams.addRule(RelativeLayout.ALIGN_RIGHT, RelativeLayout.TRUE);
+	    positionParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
+	    position.setLayoutParams(positionParams);
+	    
+	    // Zoom buttons
+	    View zoom = (View)v4.getChildAt(2);
+	    int zoomWidth = zoom.getLayoutParams().width;
+	    int zoomHeight = zoom.getLayoutParams().height;
+
+	    // Move Layout Zoom buttons.
+	    RelativeLayout.LayoutParams zoomParams = new RelativeLayout.LayoutParams(zoomWidth, zoomHeight);
+	    zoomParams.setMargins(0, 0, 0, margin);
+	    zoomParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE);
+	    zoomParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
+	    zoom.setLayoutParams(zoomParams);
 	}
 	
 	private void startNavigationDrawer(){
