@@ -225,12 +225,12 @@ public class MapDBAdapter {
 			
 		Cursor result = db.query("agencies", null, "agency_id ='"+agency_id+"'",null, null, null, null);
 		if(result.moveToFirst()){
-			agency.agency_id = result.getString(0);
-			agency.agency_name = result.getString(1);
-			agency.agency_url = result.getString(2);
-			agency.agency_timezone = result.getString(3);
-			agency.agency_lang = result.getString(4);
-			agency.agency_phone = result.getString(5); 
+			agency.agency_id = result.getString(1);
+			agency.agency_name = result.getString(2);
+			agency.agency_url = result.getString(3);
+			agency.agency_timezone = result.getString(4);
+			agency.agency_lang = result.getString(5);
+			agency.agency_phone = result.getString(6); 
 		}
 		return agency;
 	}
@@ -279,7 +279,7 @@ public class MapDBAdapter {
 			route.route_long_name = result.getString(3);
 			route.route_desc = result.getString(4);
 			route.route_type = result.getString(5);
-			//route.route_url = result.getString(6);
+			route.route_url = result.getString(6);
 			route.route_color = result.getString(7);
 			route.route_text_color = result.getString(8);
 			route.route_bikes_allowed = result.getString(9);
@@ -301,9 +301,12 @@ public class MapDBAdapter {
 		Cursor result = db.query("routes", null, "route_id ='"+route_id+"'", null, null, null, null);
 		if(result.moveToFirst()){
 		String flag = route.route_id = result.getString(10);
-			if(flag.length() < 0 && flag != null){
+		Log.i("Flag", flag);
+			if(flag.equals(route_id)){
 				exist = true;
 			}
+		}else{
+			exist = false;
 		}
 		return exist;
 	}
@@ -336,7 +339,7 @@ public class MapDBAdapter {
 								"route_long_name text null,"+
 								"route_desc text null,"+
 								"route_type text null,"+
-								"routWe text null,"+
+								"route_url text null,"+
 								"routeColor text null,"+
 								"route_text_color text null,"+
 								"route_bikes_allowed text null,"+
