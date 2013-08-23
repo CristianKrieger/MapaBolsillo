@@ -34,6 +34,7 @@ import com.essentialab.apps.mapadebolsillo.interfaces.ListItemInflationAction;
 import com.essentialab.apps.mapadebolsillo.parser.ParsingUtils;
 import com.essentialab.apps.mapadebolsillo.parser.entities.Agency;
 import com.essentialab.apps.mapadebolsillo.parser.entities.Route;
+import com.essentialab.apps.mapadebolsillo.parser.entities.Stop;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.common.GooglePlayServicesUtil;
@@ -169,6 +170,7 @@ public class HomeActivity extends ActionBarActivity implements
 	    resetLocationButton();
 	}
 	
+	// Move myLocation and Zoom buttons
 	public void resetLocationButton(){
 		// Get a reference to the zoom buttons and the position button.
 	    ViewGroup v1 = (ViewGroup)mapFragment.getView();
@@ -297,8 +299,7 @@ public class HomeActivity extends ActionBarActivity implements
 	    			map.clear();
 	    		}else{
 	    			v.setBackgroundColor(getResources().getColor(R.color.row_drawer_bgnd_selected));
-	    			isMetroSelected=true;
-//	    			new StopsGetterAsyncTask().execute(AGENCY_ID_METRO);
+	    			isMetroSelected=true;    			
 	    		}	    			
 	    		validSelection=true;
 	    	}	    		
@@ -519,6 +520,9 @@ public class HomeActivity extends ActionBarActivity implements
 			
 			MapDBAdapter db = new MapDBAdapter(getApplicationContext());
 			db.open();
+			db.emptyAgenciesTable();
+			db.emptyRoutesTable();
+			db.emptyStopsTable();
 			
 			Agency[] agencies = (Agency[]) ParsingUtils.parseJSONObjectfromWeb(
 					ParsingUtils.DATA_TYPE_AGENCIES, null);
@@ -578,12 +582,28 @@ public class HomeActivity extends ActionBarActivity implements
 			getSupportActionBar().setHomeButtonEnabled(true);
 			mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
 			
+			getStopstoDraw();
 		}
 
 		@Override
 		protected void onCancelled(Void result) {
 			//TODO: Clear DB contents
 			Log.e("HOME-ASYNCTASK", "Download was interrupted");
+		}
+	}
+	
+	// Get Stops from database to draw
+	public void getStopstoDraw(){
+		MapDBAdapter db = new MapDBAdapter(getApplicationContext());
+		db.open();
+		ArrayList<Stop> stops = new ArrayList<Stop>();
+		stops = db.getStopsByAgency(AGENCY_ID_METRO);
+		db.close();
+		for(int i = 0; i < stops.size(); i++){
+			Stop stop = new Stop();
+			stop = stops.get(i);
+			drawingStops(stop.stop_name, stop.stop_lat, stop.stop_lon);
+			
 		}
 	}
 

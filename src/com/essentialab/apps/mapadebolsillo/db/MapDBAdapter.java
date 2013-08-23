@@ -289,6 +289,76 @@ public class MapDBAdapter {
 		return route;
 	}
 	
+	// Get routes by agency_id
+	
+	public ArrayList<Route> getRoutesByAgencyId(String agency_id){
+		ArrayList<Route> routes = new ArrayList<Route>();
+		
+		Cursor result = db.query("routes", null, "agency_id ='"+agency_id+"'", null, null, null, null);
+		if(result.moveToFirst()){
+			do{
+				Route route = new Route();
+				route.agency_id = result.getString(1);
+				route.route_short_name = result.getString(2);
+				route.route_long_name = result.getString(3);
+				route.route_desc = result.getString(4);
+				route.route_type = result.getString(5);
+				route.route_url = result.getString(6);
+				route.route_color = result.getString(7);
+				route.route_text_color = result.getString(8);
+				route.route_bikes_allowed = result.getString(9);
+				route.route_id = result.getString(10);
+				
+				routes.add(route);
+			}while(result.moveToNext());
+		}
+		
+		return routes;
+	}
+	// Get Stops by route
+	public ArrayList<Stop> getStopsByRoute(String route_id){
+		ArrayList<Stop> stops = new ArrayList<Stop>();
+		Cursor result = db.query("stops", null, "route_id ='"+route_id+"'", null, null, null, null);
+		if(result.moveToFirst()){
+			do{
+				Stop stop = new Stop();
+				stop.stop_id = result.getString(1);
+				stop.stop_code = result.getString(2);
+				stop.stop_name = result.getString(3);
+				stop.stop_desc = result.getString(4);
+				stop.stop_lat = result.getString(5);
+				stop.stop_lon = result.getString(6);
+				stop.zone_id = result.getString(7);
+				stop.stop_url = result.getString(8);
+				stop.location_type = result.getString(9);
+				stop.parent_station = result.getString(10);
+				stop.wheelchair_boarding = result.getString(11);
+				stop.stop_direction = result.getString(12);
+				stop.route_id = result.getString(13);
+				stop.to_stop_id = result.getString(14);
+				
+				stops.add(stop);
+			}while(result.moveToNext());
+		}
+		
+		return stops;
+	}
+	
+	// Get stops by ageny_id
+	public ArrayList<Stop> getStopsByAgency(String agency_id){
+		ArrayList<Stop> stops = new ArrayList<Stop>();
+		ArrayList<Route> routes = new ArrayList<Route>();
+		routes = getRoutesByAgencyId(agency_id);
+		ArrayList<Stop> stopes = new ArrayList<Stop>();
+		for(int i = 0; i < routes.size(); i++){
+		stopes = getStopsByRoute(routes.get(i).route_id);
+			for(int j = 0; j < stopes.size(); j++){
+				stops.add(stopes.get(j));
+			}
+		}
+		return stops;
+	}
+	
 	// Find route by route_id
 	/**
 	 * Find route by route_id
@@ -319,7 +389,6 @@ public class MapDBAdapter {
 		// Create DB
 		@Override
 		public void onCreate(SQLiteDatabase db) {
-			Log.i("Creating Database", "OK");
 			// Agencies Table
 			final String agencyTable = "create table agencies"+
 								"(_id integer primary key autoincrement,"+

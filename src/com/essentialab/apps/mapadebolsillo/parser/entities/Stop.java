@@ -16,6 +16,10 @@ public class Stop {
 	public String route_id;
 	public String to_stop_id;
 	
+	public Stop(){
+		
+	}
+	
 	public Stop(String stop_id, String stop_code, String stop_name,
 			String stop_desc, String stop_lat, String stop_lon, String zone_id,
 			String stop_url, String location_type, String parent_station,
