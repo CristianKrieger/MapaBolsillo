@@ -133,7 +133,7 @@ public class HomeActivity extends ActionBarActivity implements
 	    }
 	}
 	
-	@SuppressLint("InlinedApi")
+	//@SuppressLint("InlinedApi")
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 	    super.onCreate(savedInstanceState);
@@ -542,11 +542,6 @@ public class HomeActivity extends ActionBarActivity implements
 			getSupportActionBar().setHomeButtonEnabled(true);
 			mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
 			
-			MapDBAdapter db = new MapDBAdapter(getApplicationContext());
-			db.open();
-			db.deleteAgency("METRO", "ROUTE_14252");
-			Log.i("que hay",db.existRoute("ROUTE_14252")+"");
-			db.close();
 		}
 
 		@Override
