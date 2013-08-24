@@ -18,9 +18,11 @@ import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.essentialab.apps.mapadebolsillo.R;
@@ -33,6 +35,7 @@ import com.essentialab.apps.mapadebolsillo.interfaces.ListItemInflationAction;
 import com.essentialab.apps.mapadebolsillo.parser.ParsingUtils;
 import com.essentialab.apps.mapadebolsillo.parser.entities.Agency;
 import com.essentialab.apps.mapadebolsillo.parser.entities.Route;
+import com.essentialab.apps.mapadebolsillo.parser.entities.Stop;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.common.GooglePlayServicesUtil;
@@ -134,7 +137,7 @@ public class HomeActivity extends ActionBarActivity implements
 	    }
 	}
 	
-	@SuppressLint("InlinedApi")
+	//@SuppressLint("InlinedApi")
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 	    super.onCreate(savedInstanceState);
@@ -165,6 +168,41 @@ public class HomeActivity extends ActionBarActivity implements
 	    
 	    myTask = new DataGetterAsyncTask();
 	    myTask.execute();
+	    resetLocationButton();
+	}
+	
+	// Move myLocation and Zoom buttons
+	public void resetLocationButton(){
+		// Get a reference to the zoom buttons and the position button.
+	    ViewGroup v1 = (ViewGroup)mapFragment.getView();
+	    ViewGroup v2 = (ViewGroup)v1.getChildAt(0);
+	    ViewGroup v3 = (ViewGroup)v2.getChildAt(0);
+	    ViewGroup v4 = (ViewGroup)v3.getChildAt(1);
+
+	    // Position button
+	    View position =  (View)v4.getChildAt(0);
+	    int positionWidth = position.getLayoutParams().width;
+	    int positionHeight = position.getLayoutParams().height;
+	    
+		// Move Layout Position button.
+	    RelativeLayout.LayoutParams positionParams = new RelativeLayout.LayoutParams(positionWidth,positionHeight);
+	    int margin = positionWidth/5;
+	    positionParams.setMargins(0, 0, 0, margin);
+	    positionParams.addRule(RelativeLayout.ALIGN_RIGHT, RelativeLayout.TRUE);
+	    positionParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
+	    position.setLayoutParams(positionParams);
+	    
+	    // Zoom buttons
+	    View zoom = (View)v4.getChildAt(2);
+	    int zoomWidth = zoom.getLayoutParams().width;
+	    int zoomHeight = zoom.getLayoutParams().height;
+
+	    // Move Layout Zoom buttons.
+	    RelativeLayout.LayoutParams zoomParams = new RelativeLayout.LayoutParams(zoomWidth, zoomHeight);
+	    zoomParams.setMargins(0, 0, 0, margin);
+	    zoomParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE);
+	    zoomParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
+	    zoom.setLayoutParams(zoomParams);
 	}
 	
 	private void startNavigationDrawer(){
@@ -262,8 +300,7 @@ public class HomeActivity extends ActionBarActivity implements
 	    			map.clear();
 	    		}else{
 	    			v.setBackgroundColor(getResources().getColor(R.color.row_drawer_bgnd_selected));
-	    			isMetroSelected=true;
-//	    			new StopsGetterAsyncTask().execute(AGENCY_ID_METRO);
+	    			isMetroSelected=true;    			
 	    		}	    			
 	    		validSelection=true;
 	    	}	    		
@@ -484,6 +521,9 @@ public class HomeActivity extends ActionBarActivity implements
 			
 			MapDBAdapter db = new MapDBAdapter(getApplicationContext());
 			db.open();
+			db.emptyAgenciesTable();
+			db.emptyRoutesTable();
+			db.emptyStopsTable();
 			
 			Agency[] agencies = (Agency[]) ParsingUtils.parseJSONObjectfromWeb(
 					ParsingUtils.DATA_TYPE_AGENCIES, null);
@@ -542,12 +582,29 @@ public class HomeActivity extends ActionBarActivity implements
 			pd.setVisibility(View.GONE);
 			getSupportActionBar().setHomeButtonEnabled(true);
 			mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+			
+			getStopstoDraw();
 		}
 
 		@Override
 		protected void onCancelled(Void result) {
 			//TODO: Clear DB contents
 			Log.e("HOME-ASYNCTASK", "Download was interrupted");
+		}
+	}
+	
+	// Get Stops from database to draw
+	public void getStopstoDraw(){
+		MapDBAdapter db = new MapDBAdapter(getApplicationContext());
+		db.open();
+		ArrayList<Stop> stops = new ArrayList<Stop>();
+		stops = db.getStopsByAgency(AGENCY_ID_METRO);
+		db.close();
+		for(int i = 0; i < stops.size(); i++){
+			Stop stop = new Stop();
+			stop = stops.get(i);
+			drawingStops(stop.stop_name, stop.stop_lat, stop.stop_lon);
+			
 		}
 	}
 
