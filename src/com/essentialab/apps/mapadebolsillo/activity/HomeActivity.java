@@ -603,7 +603,6 @@ public class HomeActivity extends ActionBarActivity implements
 			Stop stop = new Stop();
 			stop = stops.get(i);
 			drawingStops(stop.stop_name, stop.stop_lat, stop.stop_lon);
-			
 		}
 	}
 
