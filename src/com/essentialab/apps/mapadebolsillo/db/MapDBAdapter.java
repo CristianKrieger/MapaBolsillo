@@ -391,6 +391,26 @@ public class MapDBAdapter {
 		}
 		return false;
 	}
+	
+	// Find stop by stop_id
+		/**
+		 * Find stop by stop_id
+		 * @param stop_id
+		 * @return boolean
+		 */
+		public boolean stopExists(String stop_id){
+			Stop stop = new Stop();
+			Cursor result = db.query("stops", null, "stop_id ='"+stop_id+"'", null, null, null, null);
+			if(result.moveToFirst()){
+				do{
+					String flag = stop.stop_id = result.getString(10);
+					Log.i("Flag", flag);
+					if(flag.equals(stop_id))
+						return true;
+				}while(result.moveToNext());
+			}
+			return false;
+		}
 
 	private static class MapDBHelper extends SQLiteOpenHelper{
 		public MapDBHelper(Context context){

@@ -5,8 +5,10 @@ import java.util.ArrayList;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.location.Location;
 import android.os.AsyncTask;
@@ -73,7 +75,14 @@ public class HomeActivity extends ActionBarActivity implements
 	private boolean isSTETableComplete = false;
 	private boolean isSUBTableComplete = false;
 	
-	private int dataVersion = 0;
+	private static final String DB_METADATA_FILE = "PREFS_DB_FILE";
+	
+	private static final String FILE_VAR_VERSION = "version";
+	private static final String FILE_VAR_COMPLETE_METRO = "com_metro";
+	private static final String FILE_VAR_COMPLETE_METROBUS = "com_metrobus";
+	private static final String FILE_VAR_COMPLETE_STE = "com_ste";
+	private static final String FILE_VAR_COMPLETE_RTP = "com_rtp";
+	private static final String FILE_VAR_COMPLETE_SUB = "com_sub";
 	
 	private static final int DRAWER_ITEM_METRO = 1;
 	private static final int DRAWER_ITEM_METROBUS = 2;
@@ -396,7 +405,7 @@ public class HomeActivity extends ActionBarActivity implements
 	protected void onStop() {
 	    // Disconnecting the client invalidates it.
 	    mLocationClient.disconnect();
-	    myTask.cancel(true);
+//	    myTask.cancel(true);
 	    super.onStop();
 	}
 	
@@ -524,61 +533,165 @@ public class HomeActivity extends ActionBarActivity implements
 			isSUBAvailable = false;
 			
 			if(isCancelled()) return null;
+			
+			SharedPreferences metadata = getSharedPreferences(DB_METADATA_FILE, Context.MODE_PRIVATE);
+			int dataVersion = metadata.getInt(FILE_VAR_VERSION, -1);
+			Log.d("DEBUG", "SAVED DB VERSION: "+Integer.toString(dataVersion));
+			//getVersionFromServer()
+			boolean newVersion=false;
+			int versionFromServer=0;
+			if(dataVersion==versionFromServer){
+				isMetroTableComplete = metadata.getBoolean(FILE_VAR_COMPLETE_METRO, false);
+				isMetroBusTableComplete = metadata.getBoolean(FILE_VAR_COMPLETE_METROBUS, false);
+				isSTETableComplete = metadata.getBoolean(FILE_VAR_COMPLETE_STE, false);
+				isRTPTableComplete = metadata.getBoolean(FILE_VAR_COMPLETE_RTP, false);
+				isSUBTableComplete = metadata.getBoolean(FILE_VAR_COMPLETE_SUB, false);
+			}else{
+			    dataVersion = versionFromServer;
+			    newVersion=true;
+			}
+			Log.d("DEBUG", "SERVER DB VERSION: "+Integer.toString(versionFromServer));
+			
+			if(isMetroTableComplete && isMetroBusTableComplete && isSTETableComplete &&
+					isSUBTableComplete && isRTPTableComplete)
+				return null;
+			
 			MapDBAdapter db = new MapDBAdapter(getApplicationContext());
 			db.open();
-			db.clearDB();
-			Toast.makeText(getApplicationContext(),
- 					"DB deleted",
- 					Toast.LENGTH_SHORT).show();
+			
+			if(newVersion){
+				db.clearDB();
+				Log.d("DEBUG", "LOCAL DB ERASED");
+			}
 			
 			Agency[] agencies = (Agency[]) ParsingUtils.parseJSONObjectfromWeb(
 					ParsingUtils.DATA_TYPE_AGENCIES, null);
 			
+			int currentAgency=0;
 			for(int i=0;i<agencies.length;i++){
 				Log.d("DEBUG", "AGENCY "+Integer.toString(i+1)+" OF "+Integer.toString(agencies.length));
 				if(isCancelled()) break;
 				db.insertAgency(agencies[i]);
 				String agencyId=agencies[i].agency_id;
+				currentAgency=0;
+				boolean isComplete=false;
 				
-				Route[] routes = (Route[]) ParsingUtils.parseJSONObjectfromWeb(
-						ParsingUtils.DATA_TYPE_STOPS_PER_AGENCY, agencyId);
+				if(agencyId.equals(AGENCY_ID_METRO)){
+					isMetroAvailable=true;
+					currentAgency = DRAWER_ITEM_METRO;
+				}else if(agencyId.equals(AGENCY_ID_METROBUS)){
+					isMetroBusAvailable=true;
+					currentAgency = DRAWER_ITEM_METROBUS;
+				} else if(agencyId.equals(AGENCY_ID_RTP)){
+					isRTPAvailable=true;
+					currentAgency = DRAWER_ITEM_RTP;
+				}else if(agencyId.equals(AGENCY_ID_STE)){
+					isSTEAvailable=true;
+					currentAgency = DRAWER_ITEM_STE;
+				}else if(agencyId.equals(AGENCY_ID_SUB)){
+					isSUBAvailable=true;
+					currentAgency = DRAWER_ITEM_SUB;
+				}else{
+					Log.d("DEBUG", "UNKNOWN AGENCY ON JSON");
+					continue;
+				}
 				
-				for(int j=0;j<routes.length;j++){
-					Log.d("DEBUG", "ROUTE "+Integer.toString(j+1)+" OF "+Integer.toString(routes.length));
-					if(isCancelled()) break;
-					db.insertRoute(routes[j]);
+				switch(currentAgency){
+				case DRAWER_ITEM_METRO:
+					if(isMetroTableComplete){
+						Log.d("DEBUG", "SKIPPING METRO AGENCY");
+						isComplete=true;
+						break;
+					}
+				case DRAWER_ITEM_METROBUS:
+					if(isMetroBusTableComplete){
+						Log.d("DEBUG", "SKIPPING METROBUS AGENCY");
+						isComplete=true;
+						break;
+					}
+				case DRAWER_ITEM_RTP:
+					if(isRTPTableComplete){
+						Log.d("DEBUG", "SKIPPING RTP AGENCY");
+						isComplete=true;
+						break;
+					}
+				case DRAWER_ITEM_SUB:
+					if(isSUBTableComplete){
+						Log.d("DEBUG", "SKIPPING SUB AGENCY");
+						isComplete=true;
+						break;
+					}
+				case DRAWER_ITEM_STE:
+					if(isSTETableComplete){
+						Log.d("DEBUG", "SKIPPING STE AGENCY");
+						isComplete=true;
+						break;
+					}
+				}
+				
+				if(!isComplete){
+					Route[] routes = (Route[]) ParsingUtils.parseJSONObjectfromWeb(
+							ParsingUtils.DATA_TYPE_STOPS_PER_AGENCY, agencyId);
 					
-					for(int k=0;k<routes[j].stops.length;k++){
+					for(int j=0;j<routes.length;j++){
+						Log.d("DEBUG", "ROUTE "+Integer.toString(j+1)+" OF "+Integer.toString(routes.length));
 						if(isCancelled()) break;
-						Log.d("DEBUG", "STOP "+Integer.toString(k+1)+" OF "+Integer.toString(routes[j].stops.length));
-						db.insertStop(routes[j].stops[k]);
+						
+						if(db.routeExists(routes[j].route_id)){
+							Log.d("DEBUG", "SKIPPING ROUTE");
+							continue;
+						}
+						
+						db.insertRoute(routes[j]);
+						for(int k=0;k<routes[j].stops.length;k++){
+							if(isCancelled()) break;
+							Log.d("DEBUG", "STOP "+Integer.toString(k+1)+" OF "+Integer.toString(routes[j].stops.length));
+							if(db.stopExists(routes[j].stops[k].stop_id)){
+								Log.d("DEBUG", "SKIPPING STOP");
+								continue;
+							}
+							db.insertStop(routes[j].stops[k]);
+						}
+					}
+					
+					switch(currentAgency){
+					case DRAWER_ITEM_METRO:
+						Log.d("DEBUG", "METRO TABLE COMPLETE");
+						isMetroTableComplete=true;
+						break;
+					case DRAWER_ITEM_METROBUS:
+						Log.d("DEBUG", "METROBUS TABLE COMPLETE");
+						isMetroBusTableComplete=true;
+						break;
+					case DRAWER_ITEM_RTP:
+						Log.d("DEBUG", "RTP TABLE COMPLETE");
+						isRTPTableComplete=true;
+						break;
+					case DRAWER_ITEM_SUB:
+						Log.d("DEBUG", "SUB TABLE COMPLETE");
+						isSUBTableComplete=true;
+						break;
+					case DRAWER_ITEM_STE:
+						Log.d("DEBUG", "STE TABLE COMPLETE");
+						isSTETableComplete=true;
+						break;
 					}
 				}
 				
 				if(isCancelled()) break;
-				
-				if(agencyId.equals(AGENCY_ID_METRO)){
-					isMetroAvailable=true;
-					continue;
-				}
-				if(agencyId.equals(AGENCY_ID_METROBUS)){
-					isMetroBusAvailable=true;
-					continue;
-				}
-				if(agencyId.equals(AGENCY_ID_RTP)){
-					isRTPAvailable=true;
-					continue;
-				}
-				if(agencyId.equals(AGENCY_ID_STE)){
-					isSTEAvailable=true;
-					continue;
-				}
-				if(agencyId.equals(AGENCY_ID_SUB)){
-					isSUBAvailable=true;
-					continue;
-				}
 			}		
+			
 			db.close();
+			
+			SharedPreferences.Editor editor = metadata.edit();
+		    editor.putInt(FILE_VAR_VERSION, versionFromServer);
+		    editor.putBoolean(FILE_VAR_COMPLETE_METRO, isMetroTableComplete);
+		    editor.putBoolean(FILE_VAR_COMPLETE_METROBUS, isMetroBusTableComplete);
+		    editor.putBoolean(FILE_VAR_COMPLETE_STE, isSTETableComplete);
+		    editor.putBoolean(FILE_VAR_COMPLETE_SUB, isSUBTableComplete);
+		    editor.putBoolean(FILE_VAR_COMPLETE_RTP, isRTPTableComplete);
+		    
+		    editor.commit();
 			
 			return null;
 		}
@@ -610,7 +723,6 @@ public class HomeActivity extends ActionBarActivity implements
 			Stop stop = new Stop();
 			stop = stops.get(i);
 			drawingStops(stop.stop_name, stop.stop_lat, stop.stop_lon);
-			
 		}
 	}
 
