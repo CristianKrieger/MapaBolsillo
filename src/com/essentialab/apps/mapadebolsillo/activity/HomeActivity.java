@@ -2,6 +2,7 @@ package com.essentialab.apps.mapadebolsillo.activity;
 
 import java.util.ArrayList;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
@@ -162,8 +163,8 @@ public class HomeActivity extends ActionBarActivity implements
 	    
 	    mLocationClient = new LocationClient(this, this, this);
 	    
-//	    myTask = new DataGetterAsyncTask();
-//	    myTask.execute();
+	    myTask = new DataGetterAsyncTask();
+	    myTask.execute();
 	}
 	
 	private void startNavigationDrawer(){
@@ -352,7 +353,7 @@ public class HomeActivity extends ActionBarActivity implements
 	protected void onStop() {
 	    // Disconnecting the client invalidates it.
 	    mLocationClient.disconnect();
-//	    myTask.cancel(true);
+	    myTask.cancel(true);
 	    super.onStop();
 	}
 	
