@@ -67,6 +67,14 @@ public class HomeActivity extends ActionBarActivity implements
 	private boolean isSTESelected = false;
 	private boolean isSUBSelected = false;
 	
+	private boolean isMetroTableComplete = false;
+	private boolean isMetroBusTableComplete = false;
+	private boolean isRTPTableComplete = false;
+	private boolean isSTETableComplete = false;
+	private boolean isSUBTableComplete = false;
+	
+	private int dataVersion = 0;
+	
 	private static final int DRAWER_ITEM_METRO = 1;
 	private static final int DRAWER_ITEM_METROBUS = 2;
 	private static final int DRAWER_ITEM_RTP = 3;
@@ -81,9 +89,7 @@ public class HomeActivity extends ActionBarActivity implements
 	
 	private DrawerLayout mDrawerLayout;
 	private ListView mDrawerList;
-	private String mTitle;
 	private ActionBarDrawerToggle mDrawerToggle;
-	private String[] mDrawerTitles;
 	
 	private View pd;
 	
@@ -137,7 +143,7 @@ public class HomeActivity extends ActionBarActivity implements
 	    }
 	}
 	
-	//@SuppressLint("InlinedApi")
+	@SuppressLint("InlinedApi")
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 	    super.onCreate(savedInstanceState);
@@ -206,10 +212,9 @@ public class HomeActivity extends ActionBarActivity implements
 	}
 	
 	private void startNavigationDrawer(){
-		mDrawerTitles = getResources().getStringArray(R.array.act_home_drawer_array);
+		String[] mDrawerTitles = getResources().getStringArray(R.array.act_home_drawer_array);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.act_home_drawerlayout);
         mDrawerList = (ListView) findViewById(R.id.act_home_drawer);
-        mTitle=getResources().getString(R.string.app_name);
 		
 		mDrawerToggle = new ActionBarDrawerToggle(
         		this,
@@ -219,11 +224,10 @@ public class HomeActivity extends ActionBarActivity implements
                 R.string.act_home_drawer_close){
 
             public void onDrawerClosed(View view) {
-                getSupportActionBar().setTitle(mTitle);
+                getSupportActionBar().show();
             }
 
             public void onDrawerOpened(View drawerView) {
-                getSupportActionBar().setTitle(mTitle);
             }
         };
         
@@ -276,6 +280,8 @@ public class HomeActivity extends ActionBarActivity implements
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+    	if(item.getItemId()==android.R.id.home)
+    		getSupportActionBar().hide();
         if (mDrawerToggle.onOptionsItemSelected(item))
           return true;
         return super.onOptionsItemSelected(item);
@@ -518,12 +524,12 @@ public class HomeActivity extends ActionBarActivity implements
 			isSUBAvailable = false;
 			
 			if(isCancelled()) return null;
-			
 			MapDBAdapter db = new MapDBAdapter(getApplicationContext());
 			db.open();
-			db.emptyAgenciesTable();
-			db.emptyRoutesTable();
-			db.emptyStopsTable();
+			db.clearDB();
+			Toast.makeText(getApplicationContext(),
+ 					"DB deleted",
+ 					Toast.LENGTH_SHORT).show();
 			
 			Agency[] agencies = (Agency[]) ParsingUtils.parseJSONObjectfromWeb(
 					ParsingUtils.DATA_TYPE_AGENCIES, null);

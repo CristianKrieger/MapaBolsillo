@@ -90,13 +90,27 @@ public class MapDBAdapter {
 		db.delete("stops", null, null);
 	}
 	
+	// Delete DB data
+	/**
+	 * Remove all Tables
+	 */
+	public void clearDB(){
+		emptyAgenciesTable();
+		emptyRoutesTable();
+		emptyStopsTable();
+	}
+	
 	// Delete routes by agency
 	/**
 	 * Delete route by route_id from routes table
 	 * @param route_id
 	 */
 	public void deleteRoutesByAgency(String agency_id){
-		db.delete("routes", "agency_id ='"+agency_id+"'", null);
+		ArrayList<Route> routes = getRoutesByAgencyId(agency_id);
+		for(int i=0;i<routes.size();i++){
+			db.delete("routes", "route_id ='"+routes.get(i).route_id+"'", null);
+			db.delete("stops", "route_id ='"+routes.get(i).route_id+"'", null);
+		}
 	}
 	
 	// Delete Agency, routes and stops from agency_id and route_id given
@@ -105,10 +119,9 @@ public class MapDBAdapter {
 	 * @param agency_id
 	 * @param route_id
 	 */
-	public void deleteAgency(String agency_id, String route_id){
+	public void deleteAgency(String agency_id){
+		deleteRoutesByAgency(agency_id);
 		db.delete("agencies", "agency_id ='"+agency_id+"'", null);
-		db.delete("routes", "route_id ='"+route_id+"'", null);
-		db.delete("stops", "route_id ='"+route_id+"'", null);
 	}
 	
 	
@@ -365,20 +378,18 @@ public class MapDBAdapter {
 	 * @param route_id
 	 * @return boolean
 	 */
-	public boolean existRoute(String route_id){
-		boolean exist = false;
+	public boolean routeExists(String route_id){
 		Route route = new Route();
 		Cursor result = db.query("routes", null, "route_id ='"+route_id+"'", null, null, null, null);
 		if(result.moveToFirst()){
-		String flag = route.route_id = result.getString(10);
-		Log.i("Flag", flag);
-			if(flag.equals(route_id)){
-				exist = true;
-			}
-		}else{
-			exist = false;
+			do{
+				String flag = route.route_id = result.getString(10);
+				Log.i("Flag", flag);
+				if(flag.equals(route_id))
+					return true;
+			}while(result.moveToNext());
 		}
-		return exist;
+		return false;
 	}
 
 	private static class MapDBHelper extends SQLiteOpenHelper{
@@ -438,11 +449,10 @@ public class MapDBAdapter {
 		// Update DB if is necessary
 		@Override
 		public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-			
-			db.execSQL("DROP TABLE IF EXIST routes");
-			db.execSQL("DROP TABLE IF EXIST agencies");
-			db.execSQL("DROP TABLE IF EXIST stops");
-			onCreate(db);
+//			db.execSQL("DROP TABLE IF EXIST routes");
+//			db.execSQL("DROP TABLE IF EXIST agencies");
+//			db.execSQL("DROP TABLE IF EXIST stops");
+//			onCreate(db);
 		}
 	}
 }

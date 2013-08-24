@@ -13,6 +13,4 @@
     <!-- LISTVIEW ROW ITEM -->
     <color name="lv_row_time_background">#EAEAEA</color>
     <color name="lv_row_txt_location">#828282</color>
-    
-    
 </resources>
