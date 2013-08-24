@@ -117,13 +117,11 @@ public class MapDBAdapter {
 	/**
 	 * Delete Agency and data related to agenci_id and route_id given
 	 * @param agency_id
-	 * @param route_id
 	 */
 	public void deleteAgency(String agency_id){
 		deleteRoutesByAgency(agency_id);
 		db.delete("agencies", "agency_id ='"+agency_id+"'", null);
 	}
-	
 	
 	// Delete route and stops from route id given
 	/**
@@ -303,7 +301,11 @@ public class MapDBAdapter {
 	}
 	
 	// Get routes by agency_id
-	
+	/**
+	 * Get routes by agency
+	 * @param agency_id
+	 * @return ArrayList routes
+	 */
 	public ArrayList<Route> getRoutesByAgencyId(String agency_id){
 		ArrayList<Route> routes = new ArrayList<Route>();
 		
@@ -328,7 +330,13 @@ public class MapDBAdapter {
 		
 		return routes;
 	}
+	
 	// Get Stops by route
+	/**
+	 * Get Stops by route
+	 * @param route_id
+	 * @return ArrayList stops
+	 */
 	public ArrayList<Stop> getStopsByRoute(String route_id){
 		ArrayList<Stop> stops = new ArrayList<Stop>();
 		Cursor result = db.query("stops", null, "route_id ='"+route_id+"'", null, null, null, null);
@@ -358,13 +366,18 @@ public class MapDBAdapter {
 	}
 	
 	// Get stops by ageny_id
+	/**
+	 * Get Stops by agency
+	 * @param agency_id
+	 * @return ArrayList stops
+	 */
 	public ArrayList<Stop> getStopsByAgency(String agency_id){
 		ArrayList<Stop> stops = new ArrayList<Stop>();
 		ArrayList<Route> routes = new ArrayList<Route>();
 		routes = getRoutesByAgencyId(agency_id);
 		ArrayList<Stop> stopes = new ArrayList<Stop>();
 		for(int i = 0; i < routes.size(); i++){
-		stopes = getStopsByRoute(routes.get(i).route_id);
+			stopes = getStopsByRoute(routes.get(i).route_id);
 			for(int j = 0; j < stopes.size(); j++){
 				stops.add(stopes.get(j));
 			}
