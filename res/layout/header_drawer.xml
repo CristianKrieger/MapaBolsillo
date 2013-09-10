@@ -5,5 +5,4 @@
     android:orientation="vertical">
 	<TextView style="@style/SectionHeader"
 	    android:id="@+id/header_list_txt"/>
-	<View style="@style/SectionHeader_Underline"/>
 </LinearLayout>

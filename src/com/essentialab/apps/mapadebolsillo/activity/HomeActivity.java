@@ -23,6 +23,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.AdapterView;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
@@ -63,11 +64,11 @@ public class HomeActivity extends ActionBarActivity implements
 	private boolean isSTEAvailable = false;
 	private boolean isSUBAvailable = false;
 	
-	private boolean isMetroSelected = false;
-	private boolean isMetroBusSelected = false;
-	private boolean isRTPSelected = false;
-	private boolean isSTESelected = false;
-	private boolean isSUBSelected = false;
+//	private boolean isMetroSelected = false;
+//	private boolean isMetroBusSelected = false;
+//	private boolean isRTPSelected = false;
+//	private boolean isSTESelected = false;
+//	private boolean isSUBSelected = false;
 	
 	private boolean isMetroTableComplete = false;
 	private boolean isMetroBusTableComplete = false;
@@ -83,6 +84,8 @@ public class HomeActivity extends ActionBarActivity implements
 	private static final String FILE_VAR_COMPLETE_STE = "com_ste";
 	private static final String FILE_VAR_COMPLETE_RTP = "com_rtp";
 	private static final String FILE_VAR_COMPLETE_SUB = "com_sub";
+	
+	private int selectedDrawerItem = 0;
 	
 	private static final int DRAWER_ITEM_METRO = 1;
 	private static final int DRAWER_ITEM_METROBUS = 2;
@@ -247,21 +250,29 @@ public class HomeActivity extends ActionBarActivity implements
         getSupportActionBar().setHomeButtonEnabled(true);
         getSupportActionBar().setBackgroundDrawable(getResources().getDrawable(R.drawable.actionbar_background));
         
-        int[] mDrawables = {
-        	R.drawable.ic_launcher,
-        	R.drawable.ic_launcher,
-        	R.drawable.ic_launcher,
-        	R.drawable.ic_launcher,
-        	R.drawable.ic_launcher
+        int[] mDrawables_dis = {
+        	R.drawable.icn_metro_disabled,
+        	R.drawable.icn_metrobus_disabled,
+        	R.drawable.icn_rtp_disabled,
+        	R.drawable.icn_trenligero_disabled,
+        	R.drawable.icn_suburbano_disabled
         };
+        
+        int[] mDrawables_en = {
+            	R.drawable.icn_metro_enabled,
+            	R.drawable.icn_metrobus_enabled,
+            	R.drawable.icn_rtp_enabled,
+            	R.drawable.icn_trenligero_enabled,
+            	R.drawable.icn_suburbano_enabled
+            };
         
         ArrayList<Object> data = new ArrayList<Object>();
         for(int i=0; i<1; i++){
         	HeadedList<String, DrawerItem> x = new HeadedList<String, DrawerItem>();
-        	x.setHeader("Servicios de Transporte");
+        	x.setHeader("SISTEMA DE TRANSPORTE\nCiudad de México");
         	ArrayList<DrawerItem> y = new ArrayList<DrawerItem>();
         	for(int j=0; j<mDrawerTitles.length; j++)
-        		y.add(new DrawerItem(mDrawables[j], mDrawerTitles[j]));
+        		y.add(new DrawerItem(mDrawables_en[j], mDrawables_dis[j], mDrawerTitles[j]));
         	x.setContents(y);
         	data.add(x);
         }
@@ -308,82 +319,67 @@ public class HomeActivity extends ActionBarActivity implements
 	    switch(position){
 	    case DRAWER_ITEM_METRO:
 	    	if(isMetroAvailable){
-	    		if(isMetroSelected){
-	    			v.setBackgroundColor(getResources().getColor(R.color.row_drawer_bgnd_unselected));
-	    			isMetroSelected=false;
-	    			//REMOVE OVERLAY
-	    			map.clear();
-	    		}else{
-	    			v.setBackgroundColor(getResources().getColor(R.color.row_drawer_bgnd_selected));
-	    			isMetroSelected=true;    			
-	    		}	    			
 	    		validSelection=true;
 	    	}	    		
 	    	break;
 	    case DRAWER_ITEM_METROBUS:
 	    	if(isMetroBusAvailable){
-	    		if(isMetroBusSelected){
-	    			v.setBackgroundColor(getResources().getColor(R.color.row_drawer_bgnd_unselected));
-	    			isMetroBusSelected=false;
-	    			//REMOVE OVERLAY
-	    		}else{
-	    			v.setBackgroundColor(getResources().getColor(R.color.row_drawer_bgnd_selected));
-	    			isMetroBusSelected=true;
-//	    			new StopsGetterAsyncTask().execute(AGENCY_ID_METROBUS);
-	    		}
 	    		validSelection=true;
 	    	}
 		    break;
 	    case DRAWER_ITEM_RTP:
 	    	if(isRTPAvailable){
-	    		if(isRTPSelected){
-	    			v.setBackgroundColor(getResources().getColor(R.color.row_drawer_bgnd_unselected));
-	    			isRTPSelected=false;
-	    			//REMOVE OVERLAY
-	    		}else{
-	    			v.setBackgroundColor(getResources().getColor(R.color.row_drawer_bgnd_selected));
-	    			isRTPSelected=true;
-//	    			new StopsGetterAsyncTask().execute(AGENCY_ID_RTP);
-	    		}
 	    		validSelection=true;
 	    	}
 	    	break;
 	    case DRAWER_ITEM_STE:
 	    	if(isSTEAvailable){
-	    		if(isSTESelected){
-	    			v.setBackgroundColor(getResources().getColor(R.color.row_drawer_bgnd_unselected));
-	    			isSTESelected=false;
-	    			//REMOVE OVERLAY
-	    		}else{
-	    			v.setBackgroundColor(getResources().getColor(R.color.row_drawer_bgnd_selected));
-	    			isSTESelected=true;
-//	    			new StopsGetterAsyncTask().execute(AGENCY_ID_STE);
-	    		}
 	    		validSelection=true;
 	    	}
 	    	break;
 	    case DRAWER_ITEM_SUB:
 	    	if(isSUBAvailable){
-	    		if(isSUBSelected){
-	    			v.setBackgroundColor(getResources().getColor(R.color.row_drawer_bgnd_unselected));
-	    			isSUBSelected=false;
-	    			//REMOVE OVERLAY
-	    		}else{
-	    			v.setBackgroundColor(getResources().getColor(R.color.row_drawer_bgnd_selected));
-	    			isSUBSelected=true;
-//	    			new StopsGetterAsyncTask().execute(AGENCY_ID_SUB);
-	    		}
 	    		validSelection=true;
 	    	}
 	    	break;
 	    }
 	    if(validSelection){
+	    	selectDrawerItem(position, v);
 	    	mDrawerList.setItemChecked(position, true);
 		    mDrawerLayout.closeDrawer(mDrawerList);
 	    }else
 		    Toast.makeText(getApplicationContext(),
 					R.string.act_home_toast_agencydown,
 					Toast.LENGTH_SHORT).show();
+	}
+	
+	private void selectDrawerItem(int position, View v){
+//		Toast.makeText(getApplicationContext(),
+//				"UNPRESSED: "+Integer.toString(((DrawerItem)v.getTag()).iconId_unpressed)+"\n"+
+//				"PRESSED: "+Integer.toString(((DrawerItem)v.getTag()).iconId_pressed),
+//				Toast.LENGTH_SHORT).show();
+		if(selectedDrawerItem==position){
+			v.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+			ImageView iv = (ImageView)v.findViewById(R.id.row_drawer_img);
+			(iv).setImageDrawable(getResources().getDrawable(((DrawerItem)v.getTag()).iconId_unpressed));
+			selectedDrawerItem=0;
+			//REMOVE OVERLAY
+			map.clear();
+		}else{
+			if(selectedDrawerItem!=0){
+				View old = mDrawerList.getChildAt(selectedDrawerItem);
+				old.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+				((ImageView)old.findViewById(R.id.row_drawer_img)).setImageDrawable(
+						getResources().getDrawable(((DrawerItem)old.getTag()).iconId_unpressed));
+				//REMOVE OVERLAY
+				map.clear();
+			}
+			
+			selectedDrawerItem=position;
+			v.setBackgroundResource(R.drawable.drawer_background_selected);
+			((ImageView)v.findViewById(R.id.row_drawer_img)).setImageDrawable(
+					getResources().getDrawable(((DrawerItem)v.getTag()).iconId_pressed));
+		}
 	}
 	
 	/*

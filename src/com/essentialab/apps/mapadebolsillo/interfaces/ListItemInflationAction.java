@@ -12,7 +12,8 @@ public class ListItemInflationAction implements AdapterCommand{
 	public View execute(Object data, View v) {
 		DrawerItem d = (DrawerItem) data;
 		((TextView)v.findViewById(R.id.row_drawer_txt)).setText(d.title);
-		((ImageView)v.findViewById(R.id.row_drawer_img)).setImageResource(d.iconId);
+		((ImageView)v.findViewById(R.id.row_drawer_img)).setImageResource(d.iconId_unpressed);
+		v.setTag(d);
 		return v;
 	}
 }
